@@ -1,4 +1,5 @@
 .DS_Store
+.DS_Store/
 
 *.jpg
 *.jpeg
@@ -14,5 +15,4 @@
 *.toc
 *.xdv
 
-毕业论文.pdf
-main.pdf
+*.pdf
