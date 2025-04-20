@@ -1,450 +1,294 @@
-\section{基于YOLOv11网络改进的交通小目标检测算法\label{方法B}}
+\section{基于CycleGAN网络改进的去雾还原算法\label{方法A}}
 
-目标检测作为计算机视觉领域的核心任务之一，其算法性能直接决定了智能交通系统对车辆、行人及交通标志等目标的感知能力。在实时性与精度双重约束下，单阶段检测器YOLO\cite{yolov1, yolov2, yolov3, yolov4, yolov6, yolov7, yolov9, yolov10, yolov11}系列凭借其高效的端到端架构持续引领技术潮流。自YOLOv1被提出以来，该系列算法通过迭代式创新实现了检测精度与速度的协同优化。YOLOv3引入多尺度预测机制，YOLOv5优化训练，YOLOv8则进一步扩展至实例分割与姿态估计任务。然而，传统YOLO框架在交通小目标检测中仍面临以下挑战：（1）浅层特征图分辨率不足导致小目标细节丢失；（2）跨尺度特征融合机制对微小目标的空间信息传递效率低下；（3）复杂交通场景下背景噪声对分类置信度的干扰。
+随着深度学习技术的飞速发展，生成对抗网络（GAN）及其变体在图像生成和转换领域取得了显著成果。去雾还原作为计算机视觉中的关键任务之一，旨在从有雾图像中恢复出清晰、无雾的图像，对于提高图像质量、增强视觉效果以及辅助后续的图像分析任务具有重要意义。CycleGAN \cite{cgan}作为一种新兴的无监督图像到图像转换方法，在去雾还原算法中展现出巨大潜力。
 
-YOLOv11作为YOLO系列的最新演进版本，通过异构主干网络设计、动态特征金字塔融合及轻量化注意力机制三大核心创新，显著提升了小目标检测性能。本文基于YOLOv11网络，针对交通场景中因目标尺度小、遮挡频繁及环境干扰导致的漏检与误检问题，提出改进方案。本节将系统性阐述YOLOv11网络的核心架构设计及其在小目标检测中的理论优势。YOLOv11网络结构如图\ref{fig:YOLOv11}所示。
+生成对抗网络（GAN）由 Goodfellow 等人于 2014 年提出\cite{gan}，其核心思想是通过两个神经网络——生成器（Generator）和判别器（Discriminator）的对抗训练来生成逼真的数据。生成器的目标是将随机噪声映射到目标数据分布，以生成尽可能真实的样本；判别器则负责区分生成样本和真实样本。在训练过程中，生成器和判别器不断竞争，生成器努力欺骗判别器，使其无法区分生成样本和真实样本，而判别器则努力提高自己的辨别能力。最终，理想情况下生成器能够生成以假乱真的样本，判别器则无法有效区分真假样本。
 
-\subsection{YOLOv11网络结构分析}
+然而，GAN 在实际应用中存在一些局限性。首先，GAN 的训练过程较为复杂且不稳定，容易出现模式崩溃（Mode Collapse）问题，即生成器只能生成有限类型的样本，无法覆盖数据分布的多样性。其次，GAN 需要大量的成对数据进行训练，这在许多实际场景中难以获取，限制了其应用范围。
 
-\begin{figure}[htb]
-    \centering
-    \subfloat{
-        \includegraphics[width=0.8\linewidth]{../figure/yolov11.png}
-    }
-    \captionsetup{font=footnotesize}
-    \bicaption{YOLOv11网络结构}{YOLOv11 network structure diagram.}
-    \label{fig:YOLOv11}
-\end{figure}
+基于 CycleGAN 的改进去雾算法作为新一代无监督去雾方法，通过多尺度残差生成器设计、局部 - 全局判别器架构及空间自注意机制三大核心创新，显著提升了去雾图像的质量与真实性。本文基于改进 CycleGAN 网络，针对实际场景中因光照变化复杂、雾气类型多样及场景语义丰富导致的去雾效果不理想问题，提出针对性优化方案。本章将系统性阐述改进 CycleGAN 网络的核心架构设计及其在复杂场景去雾中的理论优势。
 
-\subsubsection{主干网络}
+\subsection{CycleGAN网络结构分析}
 
-YOLOv11 的主干网络是其整体架构的核心组成部分，其设计目标是通过改进特征提取能力来提升目标检测的精度，同时在计算效率和模型复杂度之间取得平衡。YOLOv11 的主干网络在继承了 YOLO 系列一贯的高效性和实时性特点的基础上，进一步优化了特征提取的深度和广度，以适应复杂场景下的目标检测需求。
+\subsubsection{CycleGAN网络框架分析}
 
-YOLOv11 的主干网络通过多层次的特征金字塔结构（Feature Pyramid Network, FPN），能够提取不同尺度的特征，从而更好地处理不同大小的目标。这种设计特别适用于交通场景中的小目标检测，因为小目标的特征往往分布在较浅的特征层，而大目标则需要更深的特征层来捕捉。
-主干网络采用了模块化的设计思路，通过堆叠多个基础模块（如卷积层、池化层和注意力模块）来构建深度网络。这种模块化设计不仅提高了网络的灵活性，还使得网络能够根据具体任务的需求进行调整。
-YOLOv11 的主干网络在设计上注重参数的高效利用，通过减少冗余计算和优化网络结构，使得模型在保持高精度的同时，显著降低了参数量和计算复杂度。
+CycleGAN 是一种无监督的图像到图像转换方法，它在 2017 年由 Zhu 等人提出。CycleGAN 的核心思想是通过引入循环一致性约束（Cycle-Consistency Loss），在没有成对数据的情况下实现不同域之间的图像转换。CycleGAN 包含两个生成器（$G_A$ 和 $G_B$）和两个判别器（$D_A$ 和 $D_B$）。生成器 $G_A$ 的作用是将图像从域 $A$ 转换到域 $B$，而生成器 $G_B$ 则将图像从域 $B$ 转换回域 $A$。判别器 $D_A$ 和 $D_B$ 分别用于判断图像是否属于域 $A$ 和域$B$。
 
-YOLOv11 的主干网络基于改进的 CSPDarknet 架构，该架构通过引入跨阶段部分连接（Cross Stage Partial Connections, CSP）技术，显著提高了特征提取的效率和精度。
+CycleGAN 的训练目标不仅包括对抗损失（Adversarial Loss），即生成器欺骗判别器的能力，还包括循环一致性损失。循环一致性损失确保图像经过两次转换后能够回到原始图像，从而保持图像内容的完整性。
+具体来说，对于一张图像 $x$ 属于域 $A$，经过生成器 $G_A$ 转换到域 $B$ 得到图像 $G_A(x)$，再通过生成器 $G_B$ 转换回域 $A$ 得到图像 $x'$，循环一致性损失要求 $x'$ 尽可能接近原始图像 $x$；
+同样地，对于一张图像 $y$ 属于域 $B$，经过生成器 $G_B$ 转换到域 $A$ 得到图像 $G_B(y)$，再通过生成器 $G_A$ 转换回域 $B$ 得到图像 $y'$，要求 $y'$ 尽可能接近原始图像 $y$。
 
-主干网络首先通过一个输入层接收图像数据，随后经过一系列初始卷积层（Convolutional Layers）进行特征提取。这些卷积层通常采用 $3\times3$ 或 $1\times1$ 的卷积核，用于提取图像的基本特征，如边缘、纹理和颜色信息。初始卷积层的设计旨在快速缩小特征图的尺寸，同时增加特征图的深度，为后续的特征提取奠定基础。
-主干网络特征提取过程如图 \ref{fig:YOLOv11_BackBone_input} 所示。
-\begin{figure}[htb]
-    \centering
-    \subfloat{
-        \includegraphics[width=0.8\linewidth]{../figure/yolov11_backbone_input.png}
-    }
-    \captionsetup{font=footnotesize}
-    \bicaption{YOLOv11主干网络输入过程}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:YOLOv11_BackBone_input}
-\end{figure}
-
-主干网络中包含多个瓶颈模块（Bottleneck Module），这些模块通过 $1\times1$ 卷积层减少特征图的深度，随后通过 $3\times3$ 卷积层进行特征提取，最后再通过 $1\times1$ 卷积层恢复特征图的深度。这种设计在不显著增加计算量的情况下，提高了特征提取的深度和精度。
-CBS 模块、BottleNeck 模块如图 \ref{fig:cbs} 、图 \ref{fig:bottleneck} 所示。
-\begin{figure}[htb]
-    \centering
-    \subfloat{
-        \includegraphics[width=0.5\linewidth]{../figure/cbs.png}
-    }
-    \captionsetup{font=footnotesize}
-    \bicaption{CBS 模块}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:cbs}
-\end{figure}
+% \begin{figure}[htb]
+%     \centering
+%     \subfloat{
+%     \includegraphics[width=0.8\linewidth]{../figure/yolov11.png}
+%     }
+%     \captionsetup{font=footnotesize}
+%     \bicaption{GAN 网络结构框架}{YOLOv11 network structure diagram.}
+%     \label{fig:gan}
+% \end{figure}
 
 \begin{figure}[htb]
     \centering
     \subfloat{
-        \includegraphics[width=0.9\linewidth]{../figure/bottleneck.png}
+    \includegraphics[width=0.8\linewidth]{../figure/cgan.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{BottleNeck模块}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:bottleneck}
+    \bicaption{CycleGAN 网络}{YOLOv11 network structure diagram.}
+    \label{fig:cgan}
 \end{figure}
 
-CSP 模块是 YOLOv11 主干网络的核心组成部分，其设计灵感来源于残差网络（ResNet）中的残差块。CSP 模块通过将特征图分为两部分，一部分直接传递到下一层，另一部分经过卷积操作后再与前一部分进行拼接，从而减少了计算量并提高了特征提取的效率。CSP 模块的引入不仅增强了网络的特征提取能力，还有效缓解了梯度消失问题，使得网络能够更深层次地学习目标的特征。
-C3k2 模块、C2PSA 模块以及 PSA Block 模块如图 \ref{fig:c3k2} 、图 \ref{fig:psablock} 所示。
+GAN 通常需要大量的成对数据进行训练，这在许多实际应用中是一个巨大的挑战。例如，在去雾还原任务中，获取大量成对的有雾图像和对应的无雾图像是非常困难的，因为无雾图像往往难以直接获得，或者需要在特定条件下拍摄，这限制了 GAN 在该领域的应用。而 CycleGAN 则可以在无监督的情况下进行训练，即不需要成对的图像数据。它利用循环一致性约束，在只有两个不同域的非配对图像集合的情况下，学习图像之间的映射关系，这大大降低了数据获取的难度，为去雾还原等任务提供了更灵活的解决方案。
+
+GAN 的网络结构相对简单，主要由一个生成器和一个判别器组成。生成器的目标是将随机噪声生成逼真的样本，判别器则用于区分生成样本和真实样本。GAN 的训练目标主要是通过最小化对抗损失函数，使生成器生成的样本尽可能接近真实数据分布，判别器尽可能准确地辨别真假样本。
+CycleGAN 的网络结构更为复杂，包含两个生成器和两个判别器。其训练目标不仅包括对抗损失，还包括循环一致性损失。对抗损失确保生成器生成的图像在目标域中具有逼真的外观，而循环一致性损失则保证图像在转换过程中内容的完整性。这种双重约束机制使得 CycleGAN 能够在没有成对数据的情况下，学习到更稳定、更准确的图像转换映射关系。
+
+\subsubsection{生成器网络}
+
+%% 介绍 编码器 - 解码器 结构
+
+CycleGAN是一种用于无监督图像到图像翻译的生成对抗网络架构。其生成器是整个网络的核心组件之一，主要承担着将输入图像从一个域（如雾天图像域）映射到目标域（如无雾图像域）的关键任务。生成器的目标是学习输入图像与目标图像之间的复杂非线性映射关系，使得生成的图像在视觉效果和语义信息上尽可能接近真实的目标域图像，从而实现图像的去雾还原等操作。
+
+CycleGAN 的生成器通常采用编码器 - 解码器结构作为基础框架。编码器部分负责将输入图像逐步下采样，提取图像的多尺度特征。例如，在处理一张雾天图像时，编码器通过一系列卷积层和池化层操作，将图像的空间分辨率降低，同时增加特征图的通道数。这一过程能够捕捉到图像中的局部和全局特征，如雾天图像中的物体轮廓、颜色分布等信息。这些特征对于后续的图像生成至关重要，因为它们包含了生成无雾图像所需的关键语义信息。
+
+解码器部分则与编码器相反，它将编码器提取到的特征逐步上采样，恢复图像的空间分辨率。在上采样过程中，解码器通过转置卷积等操作，将低分辨率的特征图逐步放大，最终生成与输入图像尺寸相同的输出图像。这个过程需要合理地利用编码器提取的特征，以确保生成的图像具有清晰的结构和细节。
+
 \begin{figure}[htb]
     \centering
     \subfloat{
-        \includegraphics[width=0.8\linewidth]{../figure/c3k2.png}
+    \includegraphics[width=1.0\linewidth]{../figure/generator.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{C3k2 模块}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:c3k2}
+    \bicaption{生成器网络}{YOLOv11 network structure diagram.}
+    \label{fig:gnet}
+\end{figure}
+
+%% 介绍ResNet残差块
+
+为了提高生成器的性能，CycleGAN 在编码器 - 解码器结构中加入了残差块。残差块是深度残差网络（ResNet）中的重要组成部分，其核心思想是通过引入 shortcut connection（捷径连接）来缓解深层网络训练中的梯度消失问题。在生成器中，残差块使得网络能够更容易地学习到输入与输出之间的残差映射，而不是直接学习原始映射。
+
+例如，在生成器的中间部分，多个残差块可以堆叠在一起。每个残差块包含两个卷积层和一个 ReLU 激活函数。输入特征先进入第一个卷积层进行卷积操作，然后通过 ReLU 激活函数引入非线性，接着进入第二个卷积层。最后，将第二个卷积层的输出与输入特征相加，得到残差块的输出。这种设计使得网络在训练过程中能够更有效地传播梯度，从而能够构建更深的生成器网络，以捕捉更复杂的图像特征和映射关系。
+
+%% 卷积与反卷积
+
+\begin{figure}[htb]
+    \centering
+    \subfloat{
+    \includegraphics[width=0.7\linewidth]{../figure/conv_detail.png}
+    }
+    \captionsetup{font=footnotesize}
+    \bicaption{卷积网络模块}{YOLOv11 network structure diagram.}
+    \label{fig:conv_detail}
 \end{figure}
 
 \begin{figure}[htb]
     \centering
     \subfloat{
-        \includegraphics[width=0.6\linewidth]{../figure/pasblock.png}
+    \includegraphics[width=0.7\linewidth]{../figure/convtranspose.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{PSA Block模块}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:psablock}
+    \bicaption{反卷积网络模块}{YOLOv11 network structure diagram.}
+    \label{fig:convtranspose}
 \end{figure}
 
+卷积层是生成器中的基础组件，用于提取图像的局部特征。在编码器部分，卷积层通过卷积核在图像上滑动，进行加权求和操作，提取图像的边缘、纹理等特征。卷积层的输出通道数通常会逐渐增加，以捕捉更丰富的特征信息。
 
-\subsubsection{特征融合网络}
+反卷积层（或转置卷积层）在解码器部分用于上采样操作，将低分辨率的特征图逐步放大。反卷积层通过学习卷积核的反向操作，将特征图的空间分辨率提高，从而恢复图像的细节。在反卷积过程中，合理的参数设置和初始化对于生成图像的质量至关重要。
 
-YOLOv11 的特征融合网络是其整体架构中不可或缺的一部分，其设计目标是通过多尺度特征的融合来提升目标检测的精度和鲁棒性。特征融合网络的设计特点主要体现在以下几个方面：
-多尺度特征融合：YOLOv11 的特征融合网络通过整合不同尺度的特征图，使得网络能够同时捕捉到目标的局部细节和全局上下文信息。这种设计特别适用于交通场景中的小目标检测，因为小目标的特征往往分布在较浅的特征层，而大目标则需要更深的特征层来捕捉。
-自适应特征加权：YOLOv11 的特征融合网络引入了自适应特征加权机制，通过动态调整不同尺度特征图的权重，使得网络能够更加关注对检测任务更重要的特征。这种机制不仅提高了特征融合的效率，还增强了网络对复杂场景的适应能力。
-高效性与实时性：特征融合网络在设计上注重计算效率和实时性，通过优化特征融合的流程和减少冗余计算，使得模型能够在资源受限的设备上高效运行。这对于交通监控系统等实时性要求较高的应用场景具有重要意义。
 
-YOLOv11 的主干网络通过特征金字塔网络（FPN）实现了多尺度特征的融合。FPN 通过自底向上和自顶向下的路径，将不同层次的特征图进行融合，从而生成具有不同尺度的特征金字塔。这种设计使得网络能够同时捕捉到目标的局部细节和全局上下文信息，特别适用于交通场景中大小不一的目标检测。
-SPPF 模块如图 \ref{fig:sppf} 所示。
+\subsubsection{判别器网络}
+
+全局判别器在整个图像层面进行判断，关注图像的整体特征和分布。它接收完整的图像作为输入，通过多层卷积操作提取图像的全局特征，包括图像的整体结构、颜色分布、纹理模式等宏观信息。其主要作用是判断输入图像是否符合目标域图像的整体特征分布，确保生成图像在整体上具有真实图像的外观和风格。例如，在去雾任务中，全局判别器会学习雾天图像和清晰图像在整体上的差异，如雾天图像通常具有较低的对比度、偏白的颜色倾向以及模糊的轮廓等特征，从而指导生成器生成具有清晰结构、自然颜色分布和高对比度的去雾图像。
+
+全局判别器通常采用卷积神经网络结构，包含多个卷积层、激活函数层（如 Leaky ReLU）以及池化层。输入图像经过卷积层的逐层特征提取，图像的空间尺寸逐渐减小，而特征通道数逐渐增加，最终得到一个特征向量。该特征向量被送入全连接层，输出一个概率值，表示输入图像属于目标域真实图像的概率。在训练过程中，全局判别器与生成器进行对抗训练。生成器试图生成能够欺骗全局判别器的图像，使其误认为生成图像是真实图像；而全局判别器则不断学习如何更准确地区分真实图像和生成图像，通过梯度下降更新网络参数，优化判别性能。这种对抗训练过程促使生成器不断提升生成图像的整体质量，使其在全局特征上逐渐接近真实图像的分布。
+
 \begin{figure}[htb]
     \centering
     \subfloat{
-        \includegraphics[width=0.85\linewidth]{../figure/sppf.png}
+    \includegraphics[width=0.8\linewidth]{../figure/discriminator.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{SPPF模块}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:sppf}
+    \bicaption{判别器网络}{YOLOv11 network structure diagram.}
+    \label{fig:discriminator}
 \end{figure}
 
-PANet 是 YOLOv11 特征融合网络的另一个重要组成部分，其通过在 FPN 的基础上引入横向连接和自底向上的增强路径，进一步优化了特征的融合过程。PANet 的设计使得特征能够在不同尺度之间更高效地流动，从而提高了特征融合的效率和检测的精度。
-横向连接：PANet 在 FPN 的基础上增加了横向连接，使得不同尺度的特征图能够直接进行融合，避免了信息的丢失。
-自底向上增强路径：PANet 通过自底向上的增强路径，将浅层特征的细节信息传递到深层特征中，从而进一步增强了特征的表达能力。
-PANet 网络模型结构如图 \ref{fig:panet} 所示。
+%% 全局判别器
+
+全局判别器在去雾过程中发挥着关键作用。它能够确保去雾后的图像在整体上具有清晰、自然的视觉效果，避免出现整体结构失真或颜色偏差等问题。例如，当生成器生成的去雾图像整体对比度较低或颜色偏暗时，全局判别器会给出较低的真实性概率，从而促使生成器调整生成策略，提高去雾图像的整体质量。通过全局判别器的监督，生成器能够生成符合清晰图像全局特征的去雾结果，增强去雾图像的视觉吸引力和可用性。
+
+
+局部判别器聚焦于图像的局部区域，关注图像的细节特征和局部纹理。它通过随机裁剪或采样等方法获取图像的局部小块区域作为输入，对这些局部区域进行判别。其主要作用是确保生成图像在局部细节上具有真实图像的纹理和结构特征，避免生成图像出现模糊、失真或不合理的局部图案。在去雾任务中，局部判别器能够帮助生成器恢复图像中被雾气遮挡的细节信息，如物体的边缘、纹理等，使去雾后的图像在局部区域更加清晰、真实。
+
+局部判别器的网络结构与全局判别器类似，也是基于 CNN 构建。由于其输入是图像的局部小块区域，因此网络的层数和参数量相对较少。局部判别器对输入的局部区域进行卷积操作，提取局部特征，如边缘、纹理、局部颜色过渡等细节信息。经过多层卷积和激活函数处理后，输出一个概率值，表示该局部区域属于目标域真实图像对应局部区域的概率。在训练过程中，局部判别器同样与生成器进行对抗训练。生成器需要生成在局部细节上逼真的图像，以欺骗局部判别器；而局部判别器则不断学习如何更准确地辨别局部区域的真实性。这种对抗训练使得生成器在生成图像时更加注重局部细节的还原和真实感，提高了去雾图像的细节质量。
+
+%% 局部判别器
+
+局部判别器对于去雾效果的提升主要体现在图像细节的恢复和增强方面。在雾天图像中，物体的边缘和纹理往往被雾气模糊，细节信息丢失严重。局部判别器能够指导生成器在去雾过程中有效地恢复这些局部细节，使去雾后的图像能够呈现出物体清晰的轮廓和丰富的纹理。例如，对于建筑物的窗户、树叶的脉络等细节部位，局部判别器可以促使生成器生成更加精细、真实的细节，从而提高去雾图像的整体质量和视觉效果。同时，局部判别器还有助于避免生成图像出现局部失真或不合理的人工痕迹，确保去雾图像的自然性和可信度。
+
+
+全局判别器和局部判别器在 CycleGAN 的去雾还原算法中相互补充、协同作用。全局判别器从整体上把握图像的宏观特征和风格，确保生成图像在整体布局、颜色分布等方面符合清晰图像的要求；局部判别器则专注于图像的细节部分，保证生成图像在局部区域具有真实的纹理和结构。在训练过程中，生成器需要同时满足全局判别器和局部判别器的要求，既要生成具有真实整体特征的图像，又要在局部细节上做到逼真自然。这种协同作用使得生成器能够生成高质量、高保真的去雾图像，有效地解决了图像去雾中的细节恢复和整体质量提升的难题。例如，在处理一幅包含复杂场景的雾天图像时，全局判别器确保整个场景的清晰度和自然度，如天空的蓝色、地面的颜色分布等；局部判别器则负责恢复场景中物体的细节，如人物的面部表情、车辆的标志等，从而使最终的去雾图像在整体和局部都达到较好的效果。
+
+\subsection{优化的CycleGAN网络}
+
+\subsubsection{Transformer模块}
+
+随着深度学习的蓬勃发展，Transformer 架构在众多领域大放异彩。它最初在自然语言处理任务中取得突破性成果，如今也将其强大的学习能力拓展至图像处理领域。在基于 CycleGAN 的去雾还原算法中，将 Transformer 插入生成器网络，可显著提升对复杂去雾还原问题的学习效果，这源于 Transformer 独特且精妙的结构与机理。
+
+Transformer 主要由编码器和解码器两部分构成，在一些图像相关任务的变体架构中，会根据实际需求对这两部分进行适当调整或简化。
+
+%% Transformer
+
+Transformer 的编码器通过多层堆叠结构（含多头自注意力机制与位置前馈网络子层），将输入数据转换为富含语义信息的中间表示。在去雾任务中，多头自注意力机制分析像素关联，把握图像结构；位置前馈网络提升模型表达力，助力学习复杂特征。
+解码器结合编码器输出和目标序列先验信息生成去雾图像，其多层结构含掩码多头自注意力、多头注意力及位置前馈子层。掩码机制确保生成顺序性，多头注意力促进编码器与解码器间信息交互。
+自注意力机制作为 Transformer 核心，通过查询、键、值向量计算元素关联权重，多头注意力并行运行多个自注意力头，增强模型表达与特征捕捉能力。位置编码（如正弦、余弦或可学习嵌入）弥补自注意力对位置信息的忽视，助力模型理解元素顺序。
+
+本文提出一种基于 Transformer 改进的 Transformer 模块，巧妙地嵌入到基于 CycleGAN 的去雾还原算法的生成器网络中，显著增强了生成器对去雾还原任务的学习效能。
+
 \begin{figure}[htb]
     \centering
     \subfloat{
-    \includegraphics[width=0.6\textwidth]{../figure/panet.png}
+    \includegraphics[width=1.0\linewidth]{../figure/transformer.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{PANet网络}{YOLOv11 BackBone network structure diagram.}
-    \label{fig:panet}
+    \bicaption{改进的 Transformer 模块}{YOLOv11 network structure diagram.}
+    \label{fig:transformer}
 \end{figure}
 
-YOLOv11 的特征融合网络通过特征融合模块将不同尺度的特征图进行融合，生成具有更高表达能力的特征图。特征融合模块通常采用逐元素加法或拼接操作，结合不同尺度的特征信息，从而提高检测的精度。
+改进的 Transformer 模块由多个核心组件协同构成。输入特征 $x$ 经历两次主要的加工循环。第一次循环聚焦于注意力机制部分：
+先经由 LayerNorm 进行规范化，此处规范操作能稳固特征的数值分布；
+随后输入到注意力模块中，实现特征序列中各元素间关联性的捕捉与衡量；
+对输出特征实施重缩放和再偏置，这类操作有助于恢复特征的合理数值范围与分布特性，避免因规范化带来的信息畸变；
+最后，将加工后的特征与原始输入特征相加，完成残差连接操作，残差连接可确保梯度顺畅传导，缓解深层网络训练时的梯度消失问题，保障模型稳定学习。
 
-\subsection{优化的YOLO网络}
+假设输入特征为 $X \in R^{H \times W \times C} $，其中 $H$ 为高度，$W$ 为宽度，$C$ 为通道数。
+首先应用 LayerNorm 对输入进行归一化，可以表示为：
+\begin{equation}
+    \label{eq:transformer1}
+    X_{norm},\ rescale,\ rebias = LayerNorm(X)
+\end{equation}
 
-作为一个轻量级目标探测器，YOLOv11以其高效的性能和简单的架构而闻名。 然而，在处理小目标时，YOLOv11存在以下主要问题：（a）特征表征能力不足：YOLOv11采用的特征提取网络没有充分考虑小目标的特征表征，导致小目标的定位精度和检测精度降低。（b）规模感知不足：原始的YOLOv11模型缺乏多尺度目标检测的有效策略，对小目标规模变化的适应性差，容易导致遗漏或误认检查。 这些问题限制了YOLOv11在小目标检测场景中的应用效果。 
+公式\ref{eq:transformer1}中，$X_{norm}$ 是归一化后的特征，$rescale$ 和 $rebias$ 分别是归一化模块输出的缩放参数和偏置参数。
 
-为了解决这些问题，本文提出了一系列基于现有方法的改进措施，包括多尺度融合模块SPPC模块、轻量级卷积模块DBSS模块和更高效的损失函数NWD损失函数，以提高检测性能，同时保持模型的轻量级。
-用YOLOv11的SPPF模块替换改进的SPPC模块，以提高模型对小目标的检测性能。
-使用DBS模块替换YOLOv11中的CBS，并使用DC3k2替换C3k2模块，这可以大大减少计算量，同时保持小目标的检测性能。
-使用DBSS注意模块插入到第3层和第5层中，以提高模型对小目标的检测性能 
-新方法的模型是EX-YOLO，如图\ref{fig:ex_yolo_detail}所示。
+然后将归一化后的特征输入到注意力机制模块 attn：
+\begin{equation}
+    X_{attn} = attn(X_{norm})
+\end{equation}
 
-\begin{figure}[htbp]
+对注意力输出进行缩放和偏置调整：
+\begin{equation}
+    X_{attn\_scaled} = X_{attn} \times rescale + rebias
+\end{equation}
+
+最后与残差连接相加：
+\begin{equation}
+    X_{res} = X + X_{attn\_scaled}
+\end{equation}
+
+第二次循环则围绕多层感知机（mlp）展开：再次以输入特征为基准建立残差连接（identity）；
+特征输入到 mlp 模块，历经两层线性变换搭配激活函数，实现对特征的非线性映射与维度拓展再压缩，深度挖掘特征的内在规律；
+最终，将处理后的特征与本次循环起始的残差相加，输出本轮 Transformer 模块加工后的特征，为后续网络层传递更为丰富、抽象且贴合任务需求的特征表示。
+
+将经过注意力机制和残差连接后的特征 $X_{res}$ 输入到多层感知机模块 mlp：
+\begin{equation}
+    X_{mlp} = mlp(X_{res})
+\end{equation}
+
+而多层感知机模块 mlp 由两个卷积层和一个激活函数组成：
+\begin{equation}
+    mlp(x) = Conv(ReLU(Conv(x)))
+\end{equation}
+
+将多层感知机的输出与残差连接相加得到最终输出：
+\begin{equation}
+    X_{out} = X_{res} + X_{mlp}
+\end{equation}
+
+相较于标准 Transformer 模块，该改进版融入了诸多契合视觉任务，尤其是去雾还原任务的创新设计。
+其一，引入的窗口注意力机制及其移位策略，完美平衡了计算效率与感受野范围，在处理高维图像特征时避免了计算资源的过度消耗，同时确保模型能捕捉到图像全局结构与局部细节特征，这对于去雾任务中需要精准还原物体边缘、纹理等细节信息极为关键；
+其二，灵活的规范化与残差连接配置选项，使整个模块能依据不同网络深度、特征维度场景，精准调控特征处理流程，提升模型适应性与性能表现，在 CycleGAN 生成器的复杂架构中，能与其他组件如卷积层、上采样层等无缝协同，全方位强化生成器对雾天图像特征的学习、转换与还原能力，最终输出高质量、视觉逼真的去雾图像成果。
+
+综上所述，该改进的 Transformer 模块凭借精心设计的多头注意力机制、多层感知机模块，搭配巧妙的规范化与残差连接策略，深度契合去雾还原任务需求。将其嵌入 CycleGAN 生成器网络后，能显著增强模型对雾天图像复杂特征的学习、关联挖掘与高质量还原能力，推动基于 GAN 架构的图像去雾技术迈向新高度，为众多依赖清晰图像输入的下游计算机视觉应用提供更优质的视觉数据基础。
+
+\subsubsection{改进的生成器网络}
+
+CycleGAN 的生成器常借助 ResNet 残差链接结构来实现图像到图像的转换任务 。虽 ResNet 残差结构助力 CycleGAN 在诸多图像生成场景下有着不错表现，但面对一些对细节捕捉要求极高且数据复杂多样的情况，其基于传统卷积的特征提取与转换能力稍显不足，难以充分挖掘并利用图像深层复杂关联特征，一定程度上制约了生成图像的质量提升以及模型在更高端任务中的拓展应用。鉴于此，本文创新性地提出将 Transformer block 巧妙插入到 CycleGAN 生成器的 ResNet 残差块结构之中。
+
+Transformer block 插入后的残差块结构如图 \ref{fig:cganformer} 
+所示。该结构在保留 ResNet 残差核心优势基础上，融合了 Transformer 的强大特性，主要由自注意力机制模块、前馈神经网络模块以及与原 ResNet 残差结构的融合连接模块构成。自注意力机制模块能够捕捉图像不同位置间全局依赖关系，突破传统卷积局部感受野限制，使模型精准聚焦于图像关键信息区域，深度理解图像语义。前馈神经网络模块则进一步对特征进行非线性变换，增强特征表达丰富度。融合连接模块保障新结构与原 ResNet 残差架构无缝衔接，既继承残差学习优势，又充分释放 Transformer 潜能。
+
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=0.9\textwidth]{../figure/ex_yolo_detail.png}
-    \captionsetup{font=footnotesize}
-    \bicaption{EX-YOLO 网络模型结构}{Some descriptions of the pictures in question.}
-    \label{fig:ex_yolo_detail}
-\end{figure}
-
-
-\subsubsection{改进的特征融合模块}
-
-在无人机的小目标检测任务中，传统目标检测算法经常面临特征提取能力不足的问题，特别是在处理中小型目标时，特征图分辨率低，导致关键信息丢失。 
-作为一种先进的目标检测算法，尽管YOLOv11在速度和准确性方面表现良好，但在小目标检测任务方面仍有改进的余地。 
-为了进一步增强中小型目标模型的特征提取能力，我们提出了SPPC模块。
-SPPC模块结合了SPPF模块的多尺度特征提取能力和CAM的特征增强能力，从而提高了中小型目标模型的特征捕获能力，从而提高了mAP。
-
-SPPC模块的结构如图\ref{fig:sppc}所示。
-模块的输入特征图首先通过$1\times1$卷积层（cv1）按通道数进行压缩，然后是多个最大池操作（MaxPool），在池过程中将功能增强插入CAM模块中。
-最后，所有特征图都通过$1\times1$卷积层（cv2）融合，以输出特征图。
-
-CAM模块的核心设计是通过多尺度卷积运算提取特征，并通过融合增强特征表达。 CAM模块的结构如图\ref{fig:cam}所示，具体公式如下：
-\begin{subnumcases}{\label{eq:cam1}}
-% \begin{aligned}
-    x_1 = Conv(x, kernel=3, dilation=1) \\
-    x_2 = Conv(x, kernel=3, dilation=3) \\
-    x_3 = Conv(x, kernel=3, dilation=5) 
-% \end{aligned}
-\end{subnumcases}
-公式 \ref{eq:cam1} 中，$x_1$、$x_2$和$x_3$分别表示不同扩展率卷积的输出。
-然后，通过$1\times1$卷积进行特征融合：
-\begin{subnumcases}{}
-    \label{eq:cam2}
-% \begin{aligned}
-    f_1 = Conv(x_1, kernel=1) \\
-    f_2 = Conv(x_2, kernel=1) \\
-    f_3 = Conv(x_3, kernel=1)
-% \end{aligned}
-\end{subnumcases}
-
-最后，CAM模块的输出是：
-\begin{equation}
-    \label{eq:cam3}
-    y = Concat(f_1, f_2, f_3)
-\end{equation}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.7\textwidth]{../figure/CAM.png}
-    \captionsetup{font=footnotesize}
-    \bicaption{CAM 模块}{Some descriptions of the pictures in question.}
-    \label{fig:cam}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.6\textwidth]{../figure/SPPC.png}
-    \captionsetup{font=footnotesize}
-    \bicaption{SPPC 模块}{Some descriptions of the pictures in question.}
-    \label{fig:sppc}
-\end{figure}
-
-SPPC模块的核心是将CAM模块嵌入到SPPF的池化过程中。 具体实现如下：（a）输入特征图$x$首先通过$1\times1$卷积层（cv1）和输出特征图$y_0$进行压缩。 在$y_0$上执行三个最大池操作（m），每次池后的功能图分别记录为$y_1$、$y_2$、$y_3$：
-\begin{subnumcases}{}
-% \begin{aligned}
-    y_0 = cv_1(x) \\
-    y_1 = m(y_0) \\
-    y_2 = m(y_1) \\
-    y_3 = m(y_2) 
-% \end{aligned}
-    % y_0 = cv_1(x), y_1 = m(y_0), y_2 = m(y_1), y_3 = m(y_2)
-\end{subnumcases}
-
-（b）将CAM模块插入$y_0$、$y_1$、$y_2$，以增强特征表达能力：
-\begin{subnumcases}{}
-% \begin{aligned}
-    y_0' = CAM(y_0) \\
-    y_1' = CAM(y_1) \\
-    y_2' = CAM(y_2)  
-% \end{aligned}
-% y_0' = CAM(y_0), y_1' = CAM(y_1), y_2' = CAM(y_2)
-\end{subnumcases}
-
-（c）将增强功能图$y_0'$、$y_1'$、$y_2'$与功能图$y_3$进行匹配：
-\begin{equation}
-    y_{concat} = Concat(y_0', y_1', y_2', y_3)
-\end{equation}
-
-（d）最后，通过$1\times1$卷积层（cv2）进行通道融合，并输出最终特征图$y$：
-\begin{equation}
-    y = cv2(y_{concat})
-\end{equation}
-
-SPPC模块可以通过结合SPPF和CAM模块来有效地提取多尺度功能。
-SPPF模块通过最大池操作捕获不同尺度的上下文信息，而CAM模块通过多尺度卷积和通道融合进一步增强了特征表达能力。
-这种设计使模型能够更好地适应中小型目标的特征提取需求。
-
-\subsubsection{轻量化的卷积模块}
-
-YOLOv11的特征提取网络依靠标准卷积操作（nn.Conv2d）来提取图像的特征信息。 
-尽管YOLOv11在目标检测任务中表现出色，但其基于标准卷积层的特征提取网络在计算资源有限的设备上的计算复杂性和资源消耗方面仍存在一些缺点。 
-为了降低YOLOv11的计算复杂性和模型参数，并将精度损失最小化，本文介绍了一个轻量级卷积单元——深度可分离卷积（DSC）。 
-
-DSC模块的核心结构如图\ref{fig:DSC}所示。该模块主要由深度卷积、点卷积和动态重量调节模块组成。
-
-（a）深度卷积是每个输入通道上的单独卷积操作。 卷积内核的数量等于输入通道的数量，每个卷积内核只作用于一个通道。 这种方法大大减少了卷积运算的计算量。 深度卷积的数学表达式是：
-\begin{equation}
-    \label{eq:dsc1}
-    O_i = \sum\limits_{k\in{K}}{I_i\otimes{W_{k,i}}}
-\end{equation}
-
-公式 \ref{eq:dsc1} 中，$O_i$表示第$i$个输出通道，$I_i$表示第$i$个输入通道，$W_{k,i}$表示作用于$i$通道的卷积内核，$K$表示卷积内核的大小，$\otimes$表示卷积操作。
-
-（b）点卷积是一种$1\times1$卷积操作，用于将深度卷积的输出通道数调整到目标通道数。 点卷积的数学表达式是：
-\begin{equation}
-    \label{eq:dsc2}
-    O = \sum\limits_{i=1}^{C_{in}}I_i\otimes{W_i}
-\end{equation}
-
-公式 \ref{eq:dsc2} 中，$O$表示输出通道，$C_{in}$表示输入通道数，$I_i$表示第$i$个输入通道，$W_i$表示点卷积的权重。
-
-（c）为了进一步减少计算量，DSC模块引入了动态权重调整机制。 通过将输入通道划分为多个块，每个块使用共享权重参数$\alpha$来动态调整卷积内核的权重。 具体实现如代码所示。 $\alpha$参数根据块数和通道数展开，并乘以卷积内核权重来生成最终卷积权重。 动态重量调整模块的数学表达式是：
-\begin{equation}
-    \label{eq:dsc3}
-    W_{res} = \alpha\odot{W_{net}}
-\end{equation}
-
-公式 \ref{eq:dsc3} 中，$W_{res}$表示调整后的卷积权重，$\alpha$表示动态权重参数，$W_{net}$表示原始卷积权重，$\odot$表示元素乘法。
-
-标准卷积的核心结构如图\ref{fig:nnConv}所示。标准卷积的计算可以通过以下公式来计算：
-\begin{equation}
-    \label{eq:conv}
-    F_{conv} = {C_{in}}\times{C_{out}}\times{K^2}\times{H}\times{W}
-\end{equation}
-
-公式 \ref{eq:conv} 中，$C_{in}$表示输入通道数，$C_{out}$表示输出通道数，$K$表示卷积内核的大小，$H$和$W$表示输入特征图的高度和宽度。 
-
-DSC模块的计算体积由两部分组成，深度卷积和点卷积：
-\begin{equation}
-\begin{aligned}
-    F_{depth} &= {C_{in}}\times{K^2}\times{H}\times{W} \\
-\end{aligned} 
-\label{eq:dsconv_depth}
-\end{equation}
-
-\begin{equation}
-\begin{aligned}
-    F_{point} &= {C_{in}}\times{C_{out}}\times{H}\times{W} \\
-\end{aligned} 
-\label{eq:dsconv_point}
-\end{equation}
-
-\begin{equation}
-\begin{aligned}
-    F_{DSC} &= F_{depth} + F_{point} \\
-            &= {C_{in}}\times\left({K^2+C_{out}}\right)\times{H}\times{W}
-\end{aligned} 
-\label{eq:dsconv}
-\end{equation}
-
-通过比较方程\ref{eq:conv}和方程\ref{eq:dsconv}，可以发现DSC模块的计算量显著降低。
-
-\begin{figure}[htbp]
-    \centering
-    \subfloat {
-        \includegraphics[width=0.7\textwidth]{../figure/nnConv.png}
+    \subfloat{
+    \includegraphics[width=1.0\linewidth]{../figure/cganformer.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{标准卷积模块}{Some descriptions of the pictures in question.}
-    \label{fig:nnConv}
+    \bicaption{改进的生成器网络}{YOLOv11 network structure diagram.}
+    \label{fig:cganformer}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \subfloat {
-        \includegraphics[width=0.7\textwidth]{../figure/DSC.png}
-    } 
-    % \caption{Compared nn.Conv Module with DSC Module}
-    \captionsetup{font=footnotesize}
-    \bicaption{DSC卷积模块}{Some descriptions of the pictures in question.}
-    \label{fig:DSC}
-\end{figure}
+ResFormerGenerator 生成器网络由编码器、残差块、Transformer 块和解码器组成。其结构设计遵循了典型的编码 - 解码架构，能够有效地提取和还原图像的多尺度特征。
 
-SimAM（Simple Attention Module）是一个简单且无参数的注意力模块\cite{simam}。 
-SimAM通过推断特征图的3D注意力权重并优化能量函数来找出每个神经元的重要性，从而提高了各种视觉任务的性能。
-SimAM通过计算特征图中每个位置的激活值与整体特征之间的相似性来动态调整每个位置的特征权重。
-与传统的注意力机制相比，SimAM不依赖额外的卷积层或池操作，计算复杂性低，并且易于集成到现有的网络架构中。
+在 ResFormerGenerator 中，共有 6 个残差块。残差块的设计目的是解决深度神经网络中的梯度消失问题，并促进信息的高效传递。每个残差块包含两个卷积层和一个跳跃连接（skip connection）。跳跃连接将输入直接传递到块的输出，使得网络可以更容易地学习残差映射。
 
-SimAM的实现基于简单的数学运算，设输入特征图$x\in{R^{{B}\times{C}\times{H}\times{W}}}$，其中$B$、$C$、$H$和$W$分别表示批次数、通道数、高度和宽度。其核心公式如下：
+为了增强生成器网络对全局特征的学习能力，ResFormerGenerator 引入了 3 个改进的 Transformer 块。Transformer 块最初在自然语言处理领域取得巨大成功，其核心思想是利用自注意力机制捕捉序列中元素之间的长距离依赖关系。在图像处理中，可以将图像视为像素序列，从而应用 Transformer 块。
+每个 Transformer 块包含多头自注意力和多层感知机。多头自注意力通过计算查询（Query）、键（Key）和值（Value）向量之间的点积，得到注意力权重矩阵，进而对输入特征进行加权求和，从而捕捉全局上下文信息。
 
-（a）计算每个通道特征图的空间维度的平均值：
+编码器将输入的雾天图像特征进行编码，提取出主要的图像特征向量。假设输入的雾天图像特征为 $X_{in} \in R^{H \times W \times C}$，其中 $H$、$W$ 分别是图像的高度和宽度，$C$ 是通道数。编码器由一系列卷积层、归一化层和激活函数构成。经过编码器处理后，得到编码后的特征表示为 $F_{enc} \in R^{H' \times W' \times C'}$ ，其中 $H'$、$W'$、$C'$分别是编码后特征的高度、宽度和通道数。编码过程可以表示为：
 \begin{equation}
-    \label{eq:simam1}
-    \mu_c = \frac{1}{{H}\times{W}}\sum\limits_{i=1}^{H}\sum\limits_{j=1}^{W}x_{c,i,j}
+    \label{eq:rfg1}
+    F_{enc} = Encoder(X_{in})
 \end{equation}
 
-公式 \ref{eq:simam1} 中，$\mu_c$表示$c$通道的平均值。
-
-（b）计算每个位置的激活值与通道平均值之间的相似性：
+在 ResNet 块阶段，共有 6 个 ResNet 块。每个 ResNet 块包含两个卷积层、归一化层和激活函数，以及一个残差连接。对于第 $i$ 个 ResNet 块（$i$=1,2,...,6），其输入为 $F_{res_{i-1}}$，输出为 $F_{res_{i}}$ ​，处理过程如下：
 \begin{equation}
-    \label{eq:simam2}
-    y_{c,i,j} = \frac{(x_{c,i,j}-\mu_c)^2}{4\left(\sum_{k=1}^{H}\sum_{l=1}^{W}(x_{c,i,j}-\mu_c)^2/n+\lambda \right)}+0.5
+    \label{eq:rfg2}
+    F_{res_{i}} = ResNetBlock_i(F_{res_{i-1}})
 \end{equation}
 
-公式 \ref{eq:simam2} 中，$n={H}\times{W}-1$，$\lambda$是一个非常小的正则化常数，用于避免分母为$0$。
+公式\ref{eq:rfg2}中，第 1 个 ResNet 块的输入为编码后的特征$F_{enc}$，即$F_{res_{0}}\ =\ F_{enc}$。经过6个ResNet块后，得到特征$F_{res_{6}}$。
 
-（c）使用Sigmoid激活函数将相似性归一化，并将归一化相似性作为输入特征图的权重应用。
+在 Transformer 块阶段，共有 3 个 Transformer 块。对于第 $j$ 个 Transformer 块（$j$=1,2,3），其输入为 $F_{trans_{j-1}} + F_{res_{8-2j}}$，输出为 $F_{trans_{j}}$ ​，处理过程如下：
 \begin{equation}
-    \label{eq:simam3}
-    output_{c,i,j} = x_{c,i,j} \cdot \sigma(y_{c,i,j})
+    \label{eq:rfg3}
+    F_{trans_j} = TransformerBlock(F_{trans_{j-1}} + F_{res_{8-2j}}) 
 \end{equation}
 
-DBSS模块连接DSC卷积单元和SimAM注意模块，以实现轻量级卷积计算和集成SimAM注意模块的轻量级模块。
+公式\ref{eq:rfg3}中，第 1 个 Transformer 块的输入为$F_{res_6}$。
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.6\textwidth]{../figure/SimAM.png}
-    \captionsetup{font=footnotesize}
-    \bicaption{SamAM 模块}{Some descriptions of the pictures in question.}
-    \label{fig:SimAM}
-\end{figure}
-
-\subsubsection{更高效的损失函数}
-
-在无人机的目标检测任务中，目标通常具有体积小、特征不显眼、背景复杂等特点，这对目标检测算法提出了更高的要求。 在处理小目标时，传统的IoU损失函数有一定的局限性。
-IoU损失函数只考虑预测框和真实框之间的重叠区域。 对于小目标，预测框和真实框之间的小偏差可能会导致大的定位误差，而IoU损失函数对这些偏差不太敏感。
-
-为了进一步提高小目标的检测性能，我们引入了NWD框损耗函数，并将其与DIoU箱损耗功能相结合。
-NWD损失函数可以通过计算预测框和真实框之间的空间和规模差异来更准确地评估预测框和真实框之间的相似性，从而提高模型捕捉小目标的能力。
-
-DIoU损失函数基于IoU损失函数的改进版本，其核心的想法是通过引入预测框和真实框中心点之间的距离来提高损失函数对空间位置的敏感性。
-具体定义如下：
+解码器将经过 Transformer 块处理后的特征 $F_{trans_3}$ 进行上采样和卷积等操作，逐步恢复图像的空间分辨率。解码器由一系列反卷积层、归一化层和激活函数构成。最终输出去雾还原后的图像特征 $X_{out} \in R^{H \times W \times C_{out}}$，其中 $C_{out}$ 是通道数。解码过程可以表示为：
 \begin{equation}
-    \label{eq:diou}
-    L_{DIoU} = 1 - \frac{A\cap{B}}{A\cup{B}} + \frac{\rho^2(c_p, c_g)}{c^2}
-\end{equation}
-公式 \ref{eq:diou} 中，$A\cap{B}$表示预测框和真实框的交集面积，$A\cup{B}$表示预测框和真实框的并集面积，$\rho^2(c_p, c_g)$表示预测框的中心点$c_p$和真实框的中心点$c_g$之间的欧几里得举例，$c$表示可以覆盖预测框和真实框最小闭合的对角线长度。
-
-NWD框损失函数是通过计算预测框和真实框之间的空间和规模差异来评估的。 两者之间的相似性。
-具体定义如下：
-给定预测框$\mathbf{p}$和地面真理边界框$\mathbf{g}$，其中心坐标是$\mathbf{c}_p = (x_p, y_p)$和$\mathbf{c}_g = (x_g, y_g)$，宽度和高度分别为$(w_p, h_p)$和$(w_g, h_g)$。 NWD损失函数的定义是：
-\begin{equation}
-    L_{NWD} = \exp\left(-\frac{\sqrt{D_W}}{c}\right)
-    \label{eq:nwd}
+    \label{eq:rfg4}
+    X_{out} = Decoder(F_{trans_3})
 \end{equation}
 
-公式 \eqref{eq:nwd} 中，Wasserstein距离$D_W$是：
-\begin{equation}
-    D_W = (\Delta x)^2 + (\Delta y)^2 + \frac{(w_p - w_g)^2 + (h_p - h_g)^2}{4} + \epsilon
-    \label{eq:dw}
-\end{equation}
 
-公式 \eqref{eq:dw} 中，$\Delta x = x_p - x_g$，$\Delta y = y_p - y_g$，$\epsilon$是一个非常小的常数，以避免除法错误，$c$是用于调整距离变焦的常数。以DIoU损失函数和NWD盒子损失函数之和作为YOLOv11的盒子损失函数：
-\begin{equation}
-    L_{box\_loss} = \frac{L_{DIoU}+L_{NWD}}{2}
-\end{equation}
+Transformer Block 中的自注意力机制能够捕捉特征图中不同位置之间的全局依赖关系，这对于理解雾气在图像中的分布具有重要意义。相比之下，传统的卷积操作由于其局部感受野的限制，难以有效捕捉全局信息。通过引入自注意力机制，模型能够更好地学习到雾气在图像中的分布规律，从而提升去雾效果。
 
-通过将DIoU损失函数和NWD损失函数相加来取平均值，我们可以进一步提高模型对小目标的检测能力，同时保持大多数目标的DIoU损失函数的检测性能。
-这种组合可以充分利用两种损失函数的优势，从而提高模型的整体检测性能。
+在前向传播过程中，跳跃连接将前面残差块的输出与当前 Transformer 块的输出相加，这种设计能够更好地融合不同层次的特征信息。低层特征包含丰富的纹理细节，而高层特征则包含语义信息。通过跳跃连接，模型能够综合利用不同层次的特征，生成更清晰、更自然的去雾图像。
 
+\subsection{图像去雾实验和雾天目标检测实验结果和分析}
 
-\subsection{交通目标检测实验结果和分析}
+新算法 CGANFormer 在 NYU2\cite{nyu2}、Dense-Haze\cite{NTIRE_Dehazing_2019} 数据集上进行训练和测试图像去雾性能，以改进每个阶段。
+在不同场景中选择复杂的场景图片，并将拟议算法的检测效果与实际场景中，并与 AODNet\cite{li2017aod}、FFA-Net\cite{ffa}、GCANet\cite{chen2019gated} 和 CycleGAN\cite{cgan} 算法进行比较。
 
-新算法在TT100K数据集\cite{tt100k}和VisDrone数据集\cite{vd}上进行训练和测试，以改进每个阶段，并与YOLOv11s\cite{yolov11}进行比较。
-为了在不降低其他比例目标的精度的情况下通过算法验证不同尺寸目标的检测精度，对TT100K和VisDrone的数据集进行了比较实验。
-最后，在不同场景中选择复杂的场景图片，并将拟议算法的检测效果与实际场景中的YOLOv11s、YOLOv10s\cite{yolov10}和YOLOv9s\cite{yolov9}算法进行比较。
+最后将 CGANFormer 算法与 EX-YOLO算法结合，在FOG-TT100K、FOG-VisDrone数据集上进行雾天目标检测性能测试，并与YOLOv9s\cite{yolov9}、YOLOv10s\cite{yolov10}、YOLOv11s\cite{yolov11}算法进行比较。
 
 \subsubsection{数据集}
 
-在目标检测领域，特别是对无人机小目标检测任务的研究，选择适当的数据集对于验证算法的性能至关重要。
-这个实验采用了两个数据集，TT100K和VisDrone。
-为了评估改进的YOLOv11算法，小目标检查测量任务的性能提供了强大的支持。
+NYU2 数据集是室内场景视觉研究领域的重要数据集，由纽约大学（NYU）构建。它包含 1449 对密集标注的 RGB 和深度图像，这些图像从多个城市的 464 个新场景中采集，利用微软 Kinect 的 RGB 和深度摄像机记录视频序列，还包含 407024 个新的未标注帧，为图像去雾等研究提供了大量室内场景的视觉数据资源，可用于训练和评估去雾算法在复杂室内环境中的性能。
 
-TT00K数据集由中国清华大学和腾讯团队收集。
-数据集由无人机获得，是交通标志的目标识别数据集；它是在不同的场景、天气和光线下收集的，因此在复杂的环境中有许多小目标。
-数据集还提供了一些属性，如场景可见性、对象类和遮挡。
-图\ref{fig:tt100k_figure}显示了TT100K数据集中的一些数据。
-从图\ref{fig:tt100k_figure}中可以看出，TT100K数据集中的小目标数量很小，分布不均匀，分布不在中心，并且有许多目标类别。
+Dense-Haze 是一个用于图像去雾研究的高质量数据集，由 CVL 于 2019 年为 NTIRE 图像去雾挑战赛构建。该数据集包含 33 对真实雾气和无雾图像对，涵盖多样化的户外场景。这些图像对是在相同照明参数下，通过专业设备引入真实雾气生成技术拍摄的，具有高密度、均匀分布的雾气特征，旨在推动单图像去雾技术的发展。Dense-Haze 数据集不仅为去雾算法提供了可靠的评估基准，还通过综合定性和定量评估揭示了现有方法在处理密集均匀雾气场景时的局限性，为未来研究指明了改进方向。
 
-\begin{figure}[htbp]
-    \centering
-    \subfloat {
-    \includegraphics[width=0.8\textwidth]{../figure/TT100K.png}
-    }
-    \captionsetup{font=footnotesize}
-    \bicaption{TT100K 数据集}{Some descriptions of the pictures in question.}
-    \label{fig:tt100k_figure}
-\end{figure}
-
-VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团队创建的大规模基准数据集，专为无人机图像和视频分析中的各种计算机视觉任务而设计。
-它包含288个视频剪辑、261,908帧图像和10,209个静态图像，涵盖了不同城市、环境、物体和密度的场景，并在各种天气和照明条件下收集。
-图\ref{fig:vd_figure}显示了VisDrone数据集中的一些数据。
-从图\ref{fig:vd_figure}中可以观察到，VisDrone数据集有大量的小目标和很少的目标类别。
-
-\begin{figure}[htbp]
-    \centering
-    \subfloat {
-    \includegraphics[width=0.8\textwidth]{../figure/VisDrone.png}
-    }
-    \captionsetup{font=footnotesize}
-    \bicaption{VisDrone 数据集}{Some descriptions of the pictures in question.}
-    \label{fig:vd_figure}
-\end{figure}
-
-虽然TT100K和VisDrone数据集不是直接基于无人机视角，但它们包含的目标类型与无人机在实际应用中需要识别的目标高度一致。
-交通标志是交通检查、智能交通和其他领域中无人机的重要识别对象，而人、自行车、摩托车和汽车是安全监控、城市交通管理和其他场景中无人机的关键检测目标。
-通过对这些数据集进行实验，可以间接评估改进的YOLOv11算法在无人驾驶飞行器小型目标检测任务中的潜力和优势。
-与此同时，这些数据集的复杂场景和多样化的样本也为算法的泛化能力和鲁棒性测试提供了良好的基础，这有利于在不同情况下发现算法的优缺点，并为进一步优化算法以满足无人机的实际应用需求提供了重要的参考。
 
 \subsubsection{实验环境}
 
-本文中用于实验的系统、系统硬件设施和软件平台如表\ref{tab:environment}所示。
+本文中用于实验的系统、系统硬件设施和软件平台如表\ref{tab:environment2}所示。
 \begin{table}[htbp]
     \centering
     \captionsetup{font=footnotesize}
     \bicaption{实验环境设置}{Symbol cross-reference table}
-    \label{tab:environment}
-    \begin{tabular}{cc}
+    \label{tab:environment2}
+    \begin{tabular}{>{\centering\arraybackslash}p{0.4\textwidth}>{\centering\arraybackslash}p{0.4\textwidth}}
         \toprule
         List              & Version            \\ 
         \midrule
@@ -460,14 +304,48 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
 
 \subsubsection{实验结果和分析}
 
-在这项研究中，我们通过比较实验评估了EX-YOLO模型（our）在2个不同数据集中，包括TT100K和VisDrone数据集上的性能，以验证小目标检测和多尺度目标检测的改进方法的有效性。
+在这项研究中，我们通过比较实验评估了 CGANFormer 模型（our）在2个不同数据集中，包括 NYU2 和 Dense-Haze 数据集上的性能，以验证图像去雾还原的改进方法的有效性。
+通过将其与基准模型 CycleGAN、AODNet、FFA-Net、GCANet 进行比较，评估改进模型在各种指标上的性能。
+
+\begin{table}[htbp]
+    \centering
+    \captionsetup{font=footnotesize}
+    \bicaption{在 NYU2 数据集上的对比实验结果}{Symbol cross-reference table}
+    \label{tab:compare_studies_nyu2}
+    \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
+        \toprule
+        性能指标 & CycleGAN & AODNet & FFA-Net & GCANet & our   \\ 
+        \midrule
+        PSNR    & 9.5      & 21.8   & 0.877   & 0.878  & 0.777 \\
+        SSIM    & 8.2      & 25.4   & 0.850   & 0.776  & 0.752 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \captionsetup{font=footnotesize}
+    \bicaption{在 Dense-Haze 数据集上的对比实验结果}{Symbol cross-reference table}
+    \label{tab:compare_studies_dh}
+    \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
+        \toprule
+        性能指标 & CycleGAN & AODNet & FFA-Net & GCANet & our   \\ 
+        \midrule
+        PSNR    & 9.5      & 21.8   & 0.877   & 0.878  & 0.777 \\
+        SSIM    & 8.2      & 25.4   & 0.850   & 0.776  & 0.752 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+接下来比较我们通过比较实验评估了EX-YOLO模型（our）在2个不同数据集中，包括TT100K和VisDrone数据集上的性能，以验证小目标检测和多尺度目标检测的改进方法的有效性。
 通过将其与基准模型YOLOv11s、YOLOv10s和YOLOv9s进行比较，评估改进模型在各种指标上的性能。
 
 \begin{table}[htbp]
     \centering
     \captionsetup{font=footnotesize}
-    \bicaption{在TT100K数据集上的对比实验结果}{Symbol cross-reference table}
-    \label{tab:compare_studies_tt100k}
+    \bicaption{在 FOG-TT100K 数据集上的对比实验结果}{Symbol cross-reference table}
+    \label{tab:compare_studies_fogtt100k}
     \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.1\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
         \toprule
         模型       & 参数量 MB & 计算量 GFLOPs & $mAP_{0.5}$   & P     & R     & FPS \\ 
@@ -482,69 +360,48 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
 
 \begin{figure}[htbp]
     \centering
-        \subfloat[EX-YOLO\label{fig:tt100k_ex_cmn}]{
+        \subfloat[EX-YOLO\label{fig:fogtt100k_ex_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_ex_confusion_matrix_normalized.png}
         }
-        \subfloat[YOLOv11s\label{fig:tt100k_11s_cmn}]{
+        \subfloat[YOLOv11s\label{fig:fogtt100k_11s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v11s_confusion_matrix_normalized.png}
         } \\
-        \subfloat[YOLOv10s\label{fig:tt100k_10s_cmn}]{
+        \subfloat[YOLOv10s\label{fig:fogtt100k_10s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v10s_confusion_matrix_normalized.png}
         }
-        \subfloat[YOLOv9s\label{fig:tt100k_9s_cmn}]{
+        \subfloat[YOLOv9s\label{fig:fogtt100k_9s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v9s_confusion_matrix_normalized.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在TT100K数据集上的归一化混淆矩阵}{Symbol cross-reference table}
-    \label{fig:tt100k_cmn}
+    \bicaption{不同的网络模型在 FOG-TT100K 数据集上的归一化混淆矩阵}{Symbol cross-reference table}
+    \label{fig:fogt100k_cmn}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-        \subfloat[EX-YOLO\label{fig:tt100k_ex_f1}]{
+        \subfloat[EX-YOLO\label{fig:fogtt100k_ex_f1}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_ex_F1_curve.png}
         }
-        \subfloat[YOLOv11s\label{fig:tt100k_11s_f1}]{
+        \subfloat[YOLOv11s\label{fig:fogtt100k_11s_f1}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v11s_F1_curve.png}
         } \\
-        \subfloat[YOLOv10s\label{fig:tt100k_10s_f1}]{
+        \subfloat[YOLOv10s\label{fig:fogtt100k_10s_f1}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v10s_F1_curve.png}
         }
-        \subfloat[YOLOv9s\label{fig:tt100k_9s_f1}]{
+        \subfloat[YOLOv9s\label{fig:fogtt100k_9s_f1}]{
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v9s_F1_curve.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在TT100K数据集上的F1得分}{Symbol cross-reference table}
-    \label{fig:tt100k_f1}
+    \bicaption{不同的网络模型在 FOG-TT100K 数据集上的F1得分}{Symbol cross-reference table}
+    \label{fig:fogtt100k_f1}
 \end{figure}
 
-在表 \ref{tab:compare_studies_tt100k} 中，从模型参数来看，YOLOv9s参数容量是最小的，只有7.5MB，而改进后的模型参数容量相对较大，为11.4MB。
-虽然our 模型在参数方面有所增加，但在计算量（GFLOP）方面显示出显著优势。
-它的计算量只有17.0GFLOPs，远远低于YOLOv11s的21.8GFLOPs、YOLOv10s的25.4GFLOPs和YOLOv9s的27.2GFLOPs。
-这表明our 模型在设计中更加关注计算效率。
-通过优化算法结构和引入高效模块，它有效地降低了模型的计算复杂性。
-
-在精度（P）方面，YOLOv9s表现最好，为0.914，our 模型为0.875，略低于YOLOv11s的0.878，但高于YOLOv10s的0.776。
-在召回（R）方面，our 模型达到了0.830，高于0.777的YOLOv11s、0.752的YOLOv10s和0.818的YOLOv9s。
-在mAP性能方面，YOLOv9s以0.906的$mAP_{0.5}$领先，但our 模型紧随其后，达到0.893的$mAP_{0.5}$，明显高于YOLOv11s的0.877和YOLOv10s的0.850。
-这表明our 模型在小型目标检测任务中具有很强的竞争力，这可以有效地提高无人机对交通标志等小型目标的检测精度。
-虽然与YOLOv9s存在一定的差距，但考虑到我们模型的计算量大幅减少，这种差距在实际应用中是可以接受的，our 模型在精度和效率之间实现了良好的平衡。
-
-图 \ref{fig:tt100k_cmn} 呈现了 YOLOv9s、YOLOv10s、YOLOv11s 以及 our 模型在TT100K数据集针对不同类别目标的预测状况。具体而言，图 \ref{fig:tt100k_cmn} 为归一化混淆矩阵的热力图形式，其中颜色深浅与预测概率呈正相关，颜色愈深，意味着预测准确率愈高，相应地，颜色愈浅，则表明预测准确率较低。需要强调的是，热力图对角线上的数据对应着模型成功预测正确标签的情况，而非对角线部分的数据则反映了模型出现标签预测错误的情形。
-
-然而，从直观观察的角度来看，图 \ref{fig:tt100k_ex_cmn}、图 \ref{fig:tt100k_11s_cmn}、图 \ref{fig:tt100k_10s_cmn} 以及图 \ref{fig:tt100k_9s_cmn} 均难以清晰地辨识出每一个类别具体的预测数据细节。但深入分析可发现，于图 \ref{fig:tt100k_ex_cmn} 所示的 our 模型中，预测错误标签几率超过 0.5 的类别数量为 7 个；在图 \ref{fig:tt100k_11s_cmn} 展示的 YOLOv11s 模型里，这一数值同样为 7 个；从图 \ref{fig:tt100k_10s_cmn} 可知，在 YOLOv10s 模型中，预测错误标签几率大于 0.5 的类别有 9 个；而依据图 \ref{fig:tt100k_9s_cmn}，YOLOv9s 模型中预测错误标签几率大于 0.5 的类别数量为 4 个。
-
-综合图 \ref{fig:tt100k_cmn} 所揭示的归一化混淆矩阵热力图信息，可以明确地得出结论：在 TT100K 数据集上，YOLOv9s 模型在预测正确类别方面展现出更为卓越的性能，这一结论也得到了表 \ref{tab:compare_studies_tt100k} 中相关数据的有力印证 ——YOLOv9s 的精确度和召回率分别达到了 0.914 和 0.818。尽管 our 模型在预测正确标签的性能上稍逊于 YOLOv9s 模型，但与 YOLOv11s 模型相比，our 模型在预测正确标签方面维持了相近的性能水平，且二者的表现均优于 YOLOv10s 模型。
-
-FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS为84.7，低于94.3的YOLOv11s、88.5的YOLOv10s和90.9的YOLOv9。 这主要是由于在our 模型中引入SPPC模块和DSC模块后，模型参数的增加，导致计算量相对较大，从而影响了处理速度。 然而，在实际应用中，FPS的差异并不大，our 模型仍然可以通过优化计算量，同时确保高检测性能，在一定程度上满足无人机实时检测的需求。
-
-图 \ref{fig:tt100k_f1} 展示了不同模型的F1得分曲线。YOLOv9s的mAP是最高的（0.906），这与其高F1 AUC一致。 我们模型的mAP为0.893，略低于YOLOv9s，但高于YOLOv11s和YOLOv10s。 这表明，尽管our 模型在平均精度上略低于YOLOv9s，但不同F1分数级别的综合性能与YOLOv9s非常接近。 F1曲线的高性能与我们模型的精度和召回率之间的良好平衡有关。 虽然F1曲线的性能略低于YOLOv9s，但our 模型仍然保持了高检测精度和处理速度，同时降低了计算量，这使得它在无人机的小目标检测任务中具有很高的实际应用价值。
 
 \begin{table}[htbp]
     \centering
     \captionsetup{font=footnotesize}
-    \bicaption{在VisDrone数据集上的对比实验结果}{Symbol cross-reference table}
-    \label{tab:compare_studies_vd}
+    \bicaption{在 FOG-VisDrone 数据集上的对比实验结果}{Symbol cross-reference table}
+    \label{tab:compare_studies_fogvd}
     \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.1\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
         \toprule
         模型       & 参数量 MB & 计算量 GFLOPs & $mAP_{0.5}$   & P     & R     & FPS \\ 
@@ -559,192 +416,41 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
 
 \begin{figure}[htbp]
     \centering
-        \subfloat[EX-YOLO\label{fig:vd_ex_cmn}]{
+        \subfloat[EX-YOLO\label{fig:fogvd_ex_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/vd_ex_confusion_matrix_normalized.png}
         }
-        \subfloat[YOLOv11s\label{fig:vd_11s_cmn}]{
+        \subfloat[YOLOv11s\label{fig:fogvd_11s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/vd_v11s_confusion_matrix_normalized.png}
         } \\
-        \subfloat[YOLOv10s\label{fig:vd_10s_cmn}]{
+        \subfloat[YOLOv10s\label{fig:fogvd_10s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/vd_v10s_confusion_matrix_normalized.png}
         }
-        \subfloat[YOLOv9s\label{fig:vd_9s_cmn}]{
+        \subfloat[YOLOv9s\label{fig:fogvd_9s_cmn}]{
             \includegraphics[width=0.4\textwidth]{../figure/vd_v9s_confusion_matrix_normalized.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在VisDrone数据集上的归一化混淆矩阵}{Symbol cross-reference table}
-    \label{fig:vd_cmn}
+    \bicaption{不同的网络模型在 FOG-VisDrone 数据集上的归一化混淆矩阵}{Symbol cross-reference table}
+    \label{fig:fogvd_cmn}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \subfloat[EX-YOLO\label{fig:vd_ex_f1}]{
+    \subfloat[EX-YOLO\label{fig:fogvd_ex_f1}]{
         \includegraphics[width=0.4\textwidth]{../figure/vd_ex_F1_curve.png}
     }
-    \subfloat[YOLOv11s\label{fig:vd_11s_f1}]{
+    \subfloat[YOLOv11s\label{fig:fogvd_11s_f1}]{
         \includegraphics[width=0.4\textwidth]{../figure/vd_v11s_F1_curve.png}
     } \\
-    \subfloat[YOLOv10s\label{fig:vd_10s_f1}]{
+    \subfloat[YOLOv10s\label{fig:fogvd_10s_f1}]{
         \includegraphics[width=0.4\textwidth]{../figure/vd_v10s_F1_curve.png}
     }
-    \subfloat[YOLOv9s\label{fig:vd_9s_f1}]{
+    \subfloat[YOLOv9s\label{fig:fogvd_9s_f1}]{
         \includegraphics[width=0.4\textwidth]{../figure/vd_v9s_F1_curve.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在VidDrone数据集上的F1得分}{Symbol cross-reference table}
-    \label{fig:vd_f1}
+    \bicaption{不同的网络模型在 FOG-VidDrone 数据集上的F1得分}{Symbol cross-reference table}
+    \label{fig:fogvd_f1}
 \end{figure}
-
-在表 \ref{tab:compare_studies_vd} 中，就计算量（GFLOPs）而言，our 模型明显低于其他值为15.4的比较模型。 YOLOv11s是21.3，YOLOv10s是24.5，YOLOv9s高达26.7。 这一结果充分表明，改进后的算法在减少计算量方面取得了出色的效果。 较低的计算量有助于延长无人机的耐用性，并提高其在复杂环境中的运行效率，使其能够更快地处理图像数据并做出准确的判断。
-
-在精度（P）方面，our 模型是0.514，高于YOLOv11s的0.485和YOLOv10s的0.501，略低于YOLOv9s的0.525。 在召回（R）方面，our 模型是0.372，略低于YOLOv11s的0.381和YOLOv10s的0.380，与YOLOv9的0.392相比存在一定的差距。
-
-图 \ref{fig:vd_cmn} 展示了 YOLOv9s、YOLOv10s、YOLOv11s 以及 our 模型在 VisDrone 数据集针对不同类别目标的预测状况，以归一化混淆矩阵热力图形式呈现。热力图颜色深浅与预测概率正相关，颜色愈深表示预测准确率愈高，颜色愈浅则表明预测准确率较低。对角线数据反映模型成功预测正确标签的情况，非对角线数据则体现模型标签预测错误的情形。
-
-从图 \ref{fig:vd_ex_cmn} 至图 \ref{fig:vd_9s_cmn} 可见，各模型在不同类别上的预测表现存在差异。
-综合归一化混淆矩阵热力图信息可知，在 VisDrone 数据集上，YOLOv9s 模型在预测正确类别方面表现较为出色，这一结论与表 \ref{tab:compare_studies_vd} 中的数据相呼应 —— YOLOv9s 的精确度（0.525）和召回率（0.392）均处于较高水平。our 模型的精确度（0.514）略低于 YOLOv9s，但召回率（0.372）与 YOLOv11s（召回率 0.381）和 YOLOv10s（召回率 0.380）相近，整体性能优于 YOLOv10s 模型。尽管 our 模型在精确度和召回率上未超越 YOLOv9s，但其在特定类别预测上展现出独特优势，例如在 “pedestrian” 和 “awning-tricycle”类别预测中，our 模型的准确率达到了 0.35 和 0.13，相较于其他模型具有一定的竞争力。
-总体而言，our 模型在 VisDrone 数据集上的表现与 YOLO 系列模型各有优劣。虽然在精确度和召回率上略逊于 YOLOv9s，但在部分类别预测上展现出独特优势，且整体性能优于 YOLOv10s 模型，与 YOLOv11s 模型相近，具有进一步优化和提升的潜力。
-
-从$mAP_{0.5}$的主要性能指数来看，our 模型达到了0.390，与YOLOv10s相同，高于YOLOv11s的0.383，略低于YOLOv9s的0.402。 虽然YOLOv9s的mAP最高，但其计算量也是最大的，这在一定程度上限制了其在实际应用中的可行性。 相比之下，our 模型仍然保持高mAP，同时有效减少计算量，这反映了改进算法在提高检测精度方面的优势。 在无人机的小目标检测任务中，关键是准确识别各种目标。 our 模型可以在复杂的场景中更好地完成这项任务，这对于提高无人驾驶飞行器在实际应用中的可靠性和有效性具有重要意义。
-
-至于FPS，FPS受到硬件的极大影响。 我们的型号是68.5，低于YOLOv11的82.6和YOLOv10的78.1，但高于YOLOv9的62.1。 our 模型可以实现相对可观的FPS，同时保持低计算量和高mAP，这表明它在处理速度方面也具有竞争力。
-
-从mAP的角度来看，YOLOv9s的mAP是最高的（0.402），这与其较高的F1 AUC一致。 我们模型的mAP是0.390，与YOLOv10s相同，但F1 AUC略低。 这表明，尽管our 模型在平均精度上与YOLOv10s相当，但不同F1分数水平的综合性能不如YOLOv10s稳定。 F1曲线的差异可能反映了我们模型在某些F1分数区间中的性能波动。
-
-通过对TT100K和VisDrone数据集的全面测试，我们改进的模型在小目标检测领域显示出竞争优势，特别是在资源有限的应用场景中。 我们的实验验证了SPPC模块、DBSS模块和NWD损失函数组合在提高检测性能和优化计算效率方面的贡献。 总的来说，这些改进增强了YOLOv11模型在小目标检测任务中的实用性，减少了对计算资源的需求，并使其更适合无人机等有限设备环境中的实际应用。
-
-接下来使用消融实验分析不同改进方法对模型的影响。经过多次实验，根据硬件设施和多次实验尝试，我们设置了以下参数：BatchSize = 8，Epoch=300。 为了清楚地显示实验的真实性，本实验采用平均精度$mAP_{0.5}$作为性能评估指数，计算量（GFLOPs）作为计算量评估指数，参数量、精度率和召回率作为参考指标。 测试结果显示在表\ref{tab:ablation_studies_tt100k}和\ref{tab:ablation_studies_vd}中。 下表显示了每个模型的性能指标，包括平均精度（$mAP_{0.5}$）、参数体积、计算量（GFLOPs）、精度率、召回率和FPS。
-
-\begin{table*}[htbp]
-    \centering
-    \captionsetup{font=footnotesize}
-    \bicaption{在TT100K数据集上的消融实验}{Symbol cross-reference table}
-    \label{tab:ablation_studies_tt100k}
-    \begin{tabular}{p{0.22\textwidth}p{0.1\textwidth}p{0.12\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
-        \toprule
-        模型       & 参数量 MB & 计算量 GFLOPs & $mAP_{0.5}$   & P     & R     & FPS \\ 
-        \midrule
-        YOLOv11s(base) & 9.5           & 21.8         & 0.877          & 0.878  & 0.777 & 94.3 \\
-        +NWD           & 9.5           & 21.8         & 0.882          & 0.876  & 0.802 & 95.2 \\
-        +NWD+SPPC      & 11.5          & 26.5         & \textbf{0.909} & 0.877  & 0.827 & 78.1 \\
-        +NWD+SPPC+DBSS & 11.4          & \textbf{17.0} & 0.893          & 0.875  & 0.830 & 84.7 \\
-        \bottomrule
-    \end{tabular}
-\end{table*}
-
-\begin{table*}[htbp]
-    \centering
-    \captionsetup{font=footnotesize}
-    \bicaption{在VisDrone数据集上的消融实验}{Symbol cross-reference table}
-    \label{tab:ablation_studies_vd}
-    \begin{tabular}{p{0.22\textwidth}p{0.1\textwidth}p{0.12\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
-        \toprule
-        模型       & 参数量 MB & 计算量 GFLOPs & $mAP_{0.5}$   & P     & R     & FPS \\ 
-        \midrule
-        YOLOv11s(base) & 9.4           & 21.3          & 0.383          & 0.485  & 0.381 & 82.6 \\
-        +NWD           & 9.4           & 21.3          & 0.386          & 0.498  & 0.382 & 80.0 \\
-        +NWD+SPPC      & 11.4          & 26.0          & \textbf{0.392} & 0.527  & 0.367 & 63.7 \\
-        +NWD+SPPC+DBSS & 11.4          & \textbf{15.4} & 0.390 & 0.514  & 0.372 & 68.5 \\
-        \bottomrule
-    \end{tabular}
-\end{table*}
-
-在表 \ref{tab:ablation_studies_tt100k} 中，在TT100K数据集中，引入基于YOLOv11s（base）的NWD损失函数后，$mAP_{0.5}$从0.877增加到0.882，增加了0.5\%，召回率从0.777增加到0.802，精度略有下降。 计算和参数保持不变，FPS略有改进，表明NWD损失函数提高了识别小目标的能力，对计算效率影响不大。 然后添加SPPC模块，$mAP_{0.5}$跃升到0.909，增加3.6\%，精度稳定，召回率达到0.827，但参数增加到11.5MB，计算量上升到26.5GFLOPs，增加21\%，FPS下降，表明性能有所提高，对计算资源的需求增加。 但在高精度检测的情况下，这是合理的。 最后，添加了DBSS模块，计算量减少到17.0GFLOPs，减少了22\%，$mAP_{0.5}$略微减少到0.893，增加了1.8\%。 精度和召回率保持在高水平，FPS反弹，表明DBSS模块在保持检测性能的同时减少了计算量，并实现了效率。 利率的平衡。
-
-在表 \ref{tab:ablation_studies_vd} 中，在VisDrone数据集中，以YOLOv11s（base）为起点，在引入NWD损失函数后，$mAP_{0.5}$从0.383增加到0.386，增加了0.7\%，精度从0.485增加到0.498，召回率保持不变。 计算量和参数保持不变，FPS略低，这对计算效率影响不大。 添加SPPC模块后，$mAP_{0.5}$达到0.392，增加2.4\%，精度提高到0.527，召回率降低但检测性能提高，参数增加到11.4MB，计算量增加到26.0GFLOPs，增加22\%，FPS显著下降，提高检测性能但增加计算资源要求。 最后，引入了DBSS模块，计算量减少到15.4GFLOPs，减少了27\%，$mAP_{0.5}$略微减少到0.390，但仍比基础高出2\%。 精度和召回率保持在良好的水平，FPS反弹，表明DBSS模块有效地减少了计算量，同时保持了检测性能并改进了模块。 复杂场景下的运营效率和适应性。
-
-基于表 \ref{tab:ablation_studies_tt100k} 和表 \ref{tab:ablation_studies_vd} 的i消融实验结果，NWD损失函数在一定程度上提高了模型对小目标的检测性能，特别是在提高召回率方面，这在无人机小目标的检测任务中发挥了积极作用；SPPC该模块显著增强了模型的特征提取和识别能力，大大提高了$mAP_{0.5}$，但也增加了模型的计算量和参数规模；DBSS模块在减少模型计算量方面取得了显著效果，可以在保持高检测性能的同时减少计算资源的消耗。 消耗和提高模型的运行效率对于平衡无人驾驶飞行器在实际应用中的检测精度和计算效率具有关键意义。 通过这些减值实验，我们在不同数据集和小目标检测场景下验证了拟议改进模块的有效性，这为改进YOLOv11算法以增强无人机的小目标检测性能提供了强有力的支持和重要参考。
-
-为了直观地看到EX-YOLO的检测效果，选择了两组复杂的场景图进行测试。 使用EX-YOLO、YOLOv11s、YOLOv10s和YOLOv9s的加权文件被保留并用于测试和比较。 图像选择标准包括具有不同尺寸和重叠目标的复杂场景。 基于上述要求，可以清楚地看到EX-YOLO、YOLOv11s、YOLOv10s和YOLOv9s之间的差异。 其中，图\ref{fig:tt100k_compare_1}和图\ref{fig:tt100k_compare_2}显示了与密集小目标分布在图片边缘的复杂场景的比较，图\ref{fig:vd_compare_1}和图\ref{fig:vd_compare_2}显示了与密集小目标和不同类别的复杂场景的比较。
-
-\begin{figure}[htbp]
-    \centering
-        \subfloat[EX-YOLO\label{fig:tt100k_1_ex}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/ex-yolos_tt100k_44171.jpg}%
-        } 
-        \subfloat[YOLOv11s\label{fig:tt100k_1_11}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v11s_tt100k_44171.jpg}%
-        }
-        \\
-        \subfloat[YOLOv10s\label{fig:tt100k_1_10}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v10s_tt100k_44171.jpg}%
-        }
-        \subfloat[YOLOv9s\label{fig:tt100k_1_9}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v9s_tt100k_44171.jpg}%
-        }
-    \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在TT100K数据集上的推理结果}{Some descriptions of the pictures in question.}
-    \label{fig:tt100k_compare_1}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-        \subfloat[EX-YOLO\label{fig:tt100k_2_ex}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/ex-yolos_tt100k_44171.jpg}%
-        } 
-        \subfloat[YOLOv11s\label{fig:tt100k_2_11}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v11s_tt100k_44171.jpg}%
-        }
-        \\
-        \subfloat[YOLOv10s\label{fig:tt100k_2_10}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v10s_tt100k_44171.jpg}%
-        }
-        \subfloat[YOLOv9s\label{fig:tt100k_2_9}]{%
-            \includegraphics[width=0.33\textwidth]{../figure/v9s_tt100k_44171.jpg}%
-        }
-    \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在TT100K数据集上的推理结果}{Some descriptions of the pictures in question.}
-    \label{fig:tt100k_compare_2}
-\end{figure}
-
-在图\ref{fig:tt100k_compare_1}和图\ref{fig:tt100k_compare_2}的比较实验中，选择了TT100K数据集中具有复杂场景和干扰的图像。
-图\ref{fig:tt100k_compare_1}显示，由于目标场景的复杂性，YOLOv9s无法检测到图片中的所有目标信息，YOLOv10s只能检测到一小部分目标信息，而YOLOv11s和EX-YOLO检测到更完整的目标信息。 可以看出，YOLOv9和YOLOv10在检测小目标方面仍然存在一些问题。 相比之下，EX-YOLO可以用低计算能力准确检测正确的目标。
-图\ref{fig:tt100k_compare_2}显示，由于目标场景的复杂性，YOLOv9s无法检测到图片中的所有目标信息，YOLOv10s只能检测到一小部分目标信息，而YOLOv11s和EX-YOLO检测到更完整的目标信息。 可以看出，YOLOv9和YOLOv10在检测小目标方面仍然存在一些问题。 相比之下，EX-YOLO可以用低计算能力准确检测正确的目标。
-
-\begin{figure}[htbp]
-    \centering
-        \subfloat[EX-YOLO\label{fig:vd_1_ex}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/ex-YOLOs_VisDrone_0000151_00348_d_0000133.jpg}} 
-        \subfloat[YOLOv11s\label{fig:vd_1_11}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v11s_VisDrone_0000151_00348_d_0000133.jpg}}
-        \\
-        \subfloat[YOLOv10s\label{fig:vd_1_10}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v10s_VisDrone_0000151_00348_d_0000133.jpg}}
-        \subfloat[YOLOv9s\label{fig:vd_1_9}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v9s_VisDrone_0000151_00348_d_0000133.jpg}}
-    \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在VisDrone数据集上的推理结果}{Some descriptions of the pictures in question.}
-    \label{fig:vd_compare_1}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-        \subfloat[EX-YOLO\label{fig:vd_2_ex}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/ex-YOLOs_VisDrone_0000151_00348_d_0000133.jpg}} 
-        \subfloat[YOLOv11s\label{fig:vd_2_11}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v11s_VisDrone_0000151_00348_d_0000133.jpg}}
-        \\
-        \subfloat[YOLOv10s\label{fig:vd_2_10}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v10s_VisDrone_0000151_00348_d_0000133.jpg}}
-        \subfloat[YOLOv9s\label{fig:9}]{%
-        \includegraphics[width=0.4\textwidth]{../figure/v9s_VisDrone_0000151_00348_d_0000133.jpg}}
-    \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在VisDrone数据集上的推理结果}{Some descriptions of the pictures in question.}
-    \label{fig:vd_compare_2}
-\end{figure}
-
-在图\ref{fig:vd_compare_1}和图\ref{fig:vd_compare_2}的比较实验中，在VisDrone数据集中选择具有复杂场景、小而密集的目标、各种目标、模糊和干扰的图像。
-在图\ref{fig:vd_compare_1}中，所有模型的探测器都无法检测到所有检测目标，只能检测其中的一部分。 可以看出，YOLOv9s表现最好，这与其高mAP相吻合。 YOLOv10s和YOLOv11s在检测具有各种目标、模糊和干扰的小型密集目标方面仍然没有足够的性能。 相比之下，EX-YOLO可以在低计算量下准确检测更准确的目标，显示出接近YOLOv9s的检测性能，并且可以在复杂和重叠的场景中准确检测更多目标。 从图\ref{fig:vd_compare_1}可以看出，EX-YOLO的检测性能明显优于YOLOv10s和YOLOv11s，但略低于YOLOv9s。
-在图\ref{fig:vd_compare_2}中，所有模型的探测器都无法检测到所有检测目标，只能检测其中的一部分。 可以看出，YOLOv9s表现最好，这与其高mAP相吻合。 YOLOv10s和YOLOv11s在检测具有各种目标、模糊和干扰的小型密集目标方面仍然没有足够的性能。 相比之下，EX-YOLO可以在低计算量下准确检测更准确的目标，显示出接近YOLOv9s的检测性能，并且可以在复杂和重叠的场景中准确检测更多目标。 从图\ref{fig:vd_compare_2}可以看出，EX-YOLO的检测性能明显优于YOLOv10s和YOLOv11s，但略低于YOLOv9s。
-
-根据图\ref{fig:tt100k_compare_1}、图\ref{fig:tt100k_compare_2}、图\ref{fig:vd_compare_1}和图\ref{fig:vd_compare_2}，当目标分布不均匀且分布不密集时，YOLOv11s可以实现更好的识别性能，而YOLOv9s可以在目标分布密集的条件下正确捕获更多目标。 EX-YOLO可以平衡这两种情况，以实现尽可能高的识别性能，这显然优于YOLOv10s，EX-YOLO大大减少了计算量。 这有利于无人机在面对复杂场景时识别小目标。
 
 \subsection{本章小结}
 
-本研究聚焦交通小目标检测难题，对 YOLOv11 网络进行深度改进，提出 EX-YOLO 算法。YOLOv11 以改进的 CSPDarknet 为骨干网络，其多层特征金字塔与 CSP 模块设计在特征提取的深度与广度上达成平衡，为复杂场景目标检测奠定基础。特征融合网络借助 FPN 和 PANet 实现多尺度特征融合与自适应加权，提升检测精度与鲁棒性。但传统 YOLO 框架在交通小目标检测中存在浅层特征图分辨率不足、跨尺度融合效率低及背景噪声干扰分类置信度等问题。
-
-针对上述挑战，本研究提出创新改进措施。改进的特征融合模块 SPPC 融合 SPPF 的多尺度特征提取与 CAM 的特征增强能力，显著提升小目标特征捕获能力，提高 mAP。轻量化卷积模块 DBSS 结合深度可分离卷积（DSC）与 SimAM 注意力模块，在降低计算复杂度的同时保持高精度，减少模型参数量与计算量，适用于资源受限设备。引入的 NWD 损失函数与 DIoU 损失函数结合，精准计算预测框与真实框的空间和规模差异，增强小目标检测能力，尤其在小目标定位精度方面表现出色。
-
-实验在 TT100K 和 VisDrone 数据集上验证 EX-YOLO 算法。结果显示，EX-YOLO 在参数量、计算量、精度、召回率和 FPS 等关键指标上综合性能优异。与 YOLOv11s、YOLOv10s 和 YOLOv9s 等基准模型相比，EX-YOLO 在保持较高检测精度的同时大幅降低计算量，平衡精度与效率。例如，在 TT100K 数据集上，EX-YOLO 的 mAP0.5 为 0.893，略低于 YOLOv9s 的 0.906，但计算量仅为其 62.5\%（17.0 GFLOPs 对比 27.2 GFLOPs）。在 VisDrone 数据集上，EX-YOLO 的 mAP0.5 与 YOLOv10s 相同（0.390），计算量却仅为后者的 62.8\%（15.4 GFLOPs 对比 24.5 GFLOPs）。消融实验进一步证实各改进模块的有效性，NWD 损失函数、SPPC 模块和 DBSS 模块在提升检测性能与优化计算效率方面发挥关键作用。
-
-实验表明，EX-YOLO 算法在交通小目标检测领域竞争优势显著，尤其适用于资源受限场景。通过引入创新模块，本研究增强 YOLOv11 模型的小目标检测实用性，降低计算资源需求，使其更适配无人机等有限设备环境。未来，随着深度学习技术发展，EX-YOLO 算法有望在智能交通系统、无人机监控等领域发挥更大作用，助力高效精准的交通目标检测。
