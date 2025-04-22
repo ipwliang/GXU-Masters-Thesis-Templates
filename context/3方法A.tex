@@ -20,11 +20,11 @@ YOLOv11作为YOLO系列的最新演进版本，通过异构主干网络设计、
 
 YOLOv11 的主干网络是其整体架构的核心组成部分，其设计目标是通过改进特征提取能力来提升目标检测的精度，同时在计算效率和模型复杂度之间取得平衡。YOLOv11 的主干网络在继承了 YOLO 系列一贯的高效性和实时性特点的基础上，进一步优化了特征提取的深度和广度，以适应复杂场景下的目标检测需求。
 
-YOLOv11 的主干网络通过多层次的特征金字塔结构（Feature Pyramid Network, FPN），能够提取不同尺度的特征，从而更好地处理不同大小的目标。这种设计特别适用于交通场景中的小目标检测，因为小目标的特征往往分布在较浅的特征层，而大目标则需要更深的特征层来捕捉。
+YOLOv11 的主干网络通过多层次的特征金字塔结构（Feature Pyramid Network, FPN）\cite{fpn}，能够提取不同尺度的特征，从而更好地处理不同大小的目标。这种设计特别适用于交通场景中的小目标检测，因为小目标的特征往往分布在较浅的特征层，而大目标则需要更深的特征层来捕捉。
 主干网络采用了模块化的设计思路，通过堆叠多个基础模块（如卷积层、池化层和注意力模块）来构建深度网络。这种模块化设计不仅提高了网络的灵活性，还使得网络能够根据具体任务的需求进行调整。
 YOLOv11 的主干网络在设计上注重参数的高效利用，通过减少冗余计算和优化网络结构，使得模型在保持高精度的同时，显著降低了参数量和计算复杂度。
 
-YOLOv11 的主干网络基于改进的 CSPDarknet 架构，该架构通过引入跨阶段部分连接（Cross Stage Partial Connections, CSP）技术，显著提高了特征提取的效率和精度。
+YOLOv11 的主干网络基于改进的 CSPDarknet 架构\cite{csp}，该架构通过引入跨阶段部分连接（Cross Stage Partial Connections, CSP）技术，显著提高了特征提取的效率和精度。
 
 主干网络首先通过一个输入层接收图像数据，随后经过一系列初始卷积层（Convolutional Layers）进行特征提取。这些卷积层通常采用 $3\times3$ 或 $1\times1$ 的卷积核，用于提取图像的基本特征，如边缘、纹理和颜色信息。初始卷积层的设计旨在快速缩小特征图的尺寸，同时增加特征图的深度，为后续的特征提取奠定基础。
 主干网络特征提取过程如图 \ref{fig:YOLOv11_BackBone_input} 所示。
@@ -46,7 +46,7 @@ CBS 模块、BottleNeck 模块如图 \ref{fig:cbs} 、图 \ref{fig:bottleneck} �
         \includegraphics[width=0.5\linewidth]{../figure/cbs.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{CBS 模块}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{CBS 模块}{CBS Module}
     \label{fig:cbs}
 \end{figure}
 
@@ -56,7 +56,7 @@ CBS 模块、BottleNeck 模块如图 \ref{fig:cbs} 、图 \ref{fig:bottleneck} �
         \includegraphics[width=0.9\linewidth]{../figure/bottleneck.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{BottleNeck模块}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{BottleNeck 模块}{BottleNeck Module}
     \label{fig:bottleneck}
 \end{figure}
 
@@ -68,7 +68,7 @@ C3k2 模块、C2PSA 模块以及 PSA Block 模块如图 \ref{fig:c3k2} 、图 \r
         \includegraphics[width=0.8\linewidth]{../figure/c3k2.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{C3k2 模块}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{C3k2 模块}{C3k2 Module}
     \label{fig:c3k2}
 \end{figure}
 
@@ -78,7 +78,7 @@ C3k2 模块、C2PSA 模块以及 PSA Block 模块如图 \ref{fig:c3k2} 、图 \r
         \includegraphics[width=0.6\linewidth]{../figure/pasblock.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{PSA Block模块}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{PSA Block 模块}{PSA Block Module}
     \label{fig:psablock}
 \end{figure}
 
@@ -98,11 +98,11 @@ SPPF 模块如图 \ref{fig:sppf} 所示。
         \includegraphics[width=0.85\linewidth]{../figure/sppf.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{SPPF模块}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{SPPF 模块}{SPPF Module}
     \label{fig:sppf}
 \end{figure}
 
-PANet 是 YOLOv11 特征融合网络的另一个重要组成部分，其通过在 FPN 的基础上引入横向连接和自底向上的增强路径，进一步优化了特征的融合过程。PANet 的设计使得特征能够在不同尺度之间更高效地流动，从而提高了特征融合的效率和检测的精度。
+PANet 是 YOLOv11 特征融合网络的另一个重要组成部分\cite{pan}，其通过在 FPN 的基础上引入横向连接和自底向上的增强路径，进一步优化了特征的融合过程。PANet 的设计使得特征能够在不同尺度之间更高效地流动，从而提高了特征融合的效率和检测的精度。
 横向连接：PANet 在 FPN 的基础上增加了横向连接，使得不同尺度的特征图能够直接进行融合，避免了信息的丢失。
 自底向上增强路径：PANet 通过自底向上的增强路径，将浅层特征的细节信息传递到深层特征中，从而进一步增强了特征的表达能力。
 PANet 网络模型结构如图 \ref{fig:panet} 所示。
@@ -112,7 +112,7 @@ PANet 网络模型结构如图 \ref{fig:panet} 所示。
     \includegraphics[width=0.6\textwidth]{../figure/panet.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{PANet网络}{YOLOv11 BackBone network structure diagram.}
+    \bicaption{PANet网络}{PANet}
     \label{fig:panet}
 \end{figure}
 
@@ -120,19 +120,19 @@ YOLOv11 的特征融合网络通过特征融合模块将不同尺度的特征图
 
 \subsection{优化的YOLO网络}
 
-作为一个轻量级目标探测器，YOLOv11以其高效的性能和简单的架构而闻名。 然而，在处理小目标时，YOLOv11存在以下主要问题：（a）特征表征能力不足：YOLOv11采用的特征提取网络没有充分考虑小目标的特征表征，导致小目标的定位精度和检测精度降低。（b）规模感知不足：原始的YOLOv11模型缺乏多尺度目标检测的有效策略，对小目标规模变化的适应性差，容易导致遗漏或误认检查。 这些问题限制了YOLOv11在小目标检测场景中的应用效果。 
+作为一个轻量级目标探测器，YOLOv11 以其高效的性能和简单的架构而闻名。 然而，在处理小目标时，YOLOv11 存在以下主要问题：（a）特征表征能力不足：YOLOv11 采用的特征提取网络没有充分考虑小目标的特征表征，导致小目标的定位精度和检测精度降低。（b）规模感知不足：原始的YOLOv11模型缺乏多尺度目标检测的有效策略，对小目标规模变化的适应性差，容易导致遗漏或误认检查。 这些问题限制了 YOLOv11 在小目标检测场景中的应用效果。 
 
-为了解决这些问题，本文提出了一系列基于现有方法的改进措施，包括多尺度融合模块SPPC模块、轻量级卷积模块DBSS模块和更高效的损失函数NWD损失函数，以提高检测性能，同时保持模型的轻量级。
-用YOLOv11的SPPF模块替换改进的SPPC模块，以提高模型对小目标的检测性能。
-使用DBS模块替换YOLOv11中的CBS，并使用DC3k2替换C3k2模块，这可以大大减少计算量，同时保持小目标的检测性能。
-使用DBSS注意模块插入到第3层和第5层中，以提高模型对小目标的检测性能 
-新方法的模型是EX-YOLO，如图\ref{fig:ex_yolo_detail}所示。
+为了解决这些问题，本文提出了一系列基于现有方法的改进措施，包括多尺度融合模块 SPPC 模块、轻量级卷积模块DBSS模块和更高效的损失函数NWD损失函数，以提高检测性能，同时保持模型的轻量级。
+用 YOLOv11 的SPPF模块替换改进的SPPC模块，以提高模型对小目标的检测性能。
+使用 DBS 模块替换 YOLOv11 中的 CBS，并使用 DC3k2 替换 C3k2 模块，这可以大大减少计算量，同时保持小目标的检测性能。
+使用 DBSS 注意模块插入到第3层和第5层中，以提高模型对小目标的检测性能 
+新方法的模型是 EX-YOLO，如图\ref{fig:ex_yolo_detail}所示。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{../figure/ex_yolo_detail.png}
     \captionsetup{font=footnotesize}
-    \bicaption{EX-YOLO 网络模型结构}{Some descriptions of the pictures in question.}
+    \bicaption{EX-YOLO 网络模型结构}{EX-YOLO network structure diagram}
     \label{fig:ex_yolo_detail}
 \end{figure}
 
@@ -140,15 +140,15 @@ YOLOv11 的特征融合网络通过特征融合模块将不同尺度的特征图
 \subsubsection{改进的特征融合模块}
 
 在无人机的小目标检测任务中，传统目标检测算法经常面临特征提取能力不足的问题，特别是在处理中小型目标时，特征图分辨率低，导致关键信息丢失。 
-作为一种先进的目标检测算法，尽管YOLOv11在速度和准确性方面表现良好，但在小目标检测任务方面仍有改进的余地。 
-为了进一步增强中小型目标模型的特征提取能力，我们提出了SPPC模块。
-SPPC模块结合了SPPF模块的多尺度特征提取能力和CAM的特征增强能力，从而提高了中小型目标模型的特征捕获能力，从而提高了mAP。
+作为一种先进的目标检测算法，尽管 YOLOv11 在速度和准确性方面表现良好，但在小目标检测任务方面仍有改进的余地。 
+为了进一步增强中小型目标模型的特征提取能力，我们提出了 SPPC 模块。
+SPPC 模块结合了 SPPF 模块的多尺度特征提取能力和 CAM\cite{cam} 的特征增强能力，从而提高了中小型目标模型的特征捕获能力，从而提高了mAP。
 
-SPPC模块的结构如图\ref{fig:sppc}所示。
-模块的输入特征图首先通过$1\times1$卷积层（cv1）按通道数进行压缩，然后是多个最大池操作（MaxPool），在池过程中将功能增强插入CAM模块中。
-最后，所有特征图都通过$1\times1$卷积层（cv2）融合，以输出特征图。
+SPPC 模块的结构如图 \ref{fig:sppc}所示。
+模块的输入特征图首先通过 $1\times1$ 卷积层（cv1）按通道数进行压缩，然后是多个最大池操作（MaxPool），在池过程中将功能增强插入 CAM 模块中。
+最后，所有特征图都通过 $1\times1$ 卷积层（cv2）融合，以输出特征图。
 
-CAM模块的核心设计是通过多尺度卷积运算提取特征，并通过融合增强特征表达。 CAM模块的结构如图\ref{fig:cam}所示，具体公式如下：
+CAM 模块的核心设计是通过多尺度卷积运算提取特征，并通过融合增强特征表达。 CAM 模块的结构如图 \ref{fig:cam} 所示，具体公式如下：
 \begin{subnumcases}{\label{eq:cam1}}
 % \begin{aligned}
     x_1 = Conv(x, kernel=3, dilation=1) \\
@@ -167,7 +167,7 @@ CAM模块的核心设计是通过多尺度卷积运算提取特征，并通过�
 % \end{aligned}
 \end{subnumcases}
 
-最后，CAM模块的输出是：
+最后，CAM 模块的输出是：
 \begin{equation}
     \label{eq:cam3}
     y = Concat(f_1, f_2, f_3)
@@ -177,7 +177,7 @@ CAM模块的核心设计是通过多尺度卷积运算提取特征，并通过�
     \centering
     \includegraphics[width=0.7\textwidth]{../figure/CAM.png}
     \captionsetup{font=footnotesize}
-    \bicaption{CAM 模块}{Some descriptions of the pictures in question.}
+    \bicaption{CAM 模块}{CAM Module}
     \label{fig:cam}
 \end{figure}
 
@@ -185,11 +185,11 @@ CAM模块的核心设计是通过多尺度卷积运算提取特征，并通过�
     \centering
     \includegraphics[width=0.6\textwidth]{../figure/SPPC.png}
     \captionsetup{font=footnotesize}
-    \bicaption{SPPC 模块}{Some descriptions of the pictures in question.}
+    \bicaption{SPPC 模块}{SPPC Module}
     \label{fig:sppc}
 \end{figure}
 
-SPPC模块的核心是将CAM模块嵌入到SPPF的池化过程中。 具体实现如下：（a）输入特征图$x$首先通过$1\times1$卷积层（cv1）和输出特征图$y_0$进行压缩。 在$y_0$上执行三个最大池操作（m），每次池后的功能图分别记录为$y_1$、$y_2$、$y_3$：
+SPPC模块的核心是将CAM模块嵌入到SPPF的池化过程中。 具体实现如下：（a）输入特征图 $x$ 首先通过 $1\times1$ 卷积层（cv1）和输出特征图 $y_0$ 进行压缩。 在 $y_0$ 上执行三个最大池操作（m），每次池后的功能图分别记录为 $y_1$、$y_2$、$y_3$：
 \begin{subnumcases}{}
 % \begin{aligned}
     y_0 = cv_1(x) \\
@@ -200,7 +200,7 @@ SPPC模块的核心是将CAM模块嵌入到SPPF的池化过程中。 具体实�
     % y_0 = cv_1(x), y_1 = m(y_0), y_2 = m(y_1), y_3 = m(y_2)
 \end{subnumcases}
 
-（b）将CAM模块插入$y_0$、$y_1$、$y_2$，以增强特征表达能力：
+（b）将CAM模块插入 $y_0$、$y_1$、$y_2$，以增强特征表达能力：
 \begin{subnumcases}{}
 % \begin{aligned}
     y_0' = CAM(y_0) \\
@@ -210,27 +210,27 @@ SPPC模块的核心是将CAM模块嵌入到SPPF的池化过程中。 具体实�
 % y_0' = CAM(y_0), y_1' = CAM(y_1), y_2' = CAM(y_2)
 \end{subnumcases}
 
-（c）将增强功能图$y_0'$、$y_1'$、$y_2'$与功能图$y_3$进行匹配：
+（c）将增强功能图 $y_0'$、$y_1'$、$y_2'$ 与功能图 $y_3$ 进行匹配：
 \begin{equation}
     y_{concat} = Concat(y_0', y_1', y_2', y_3)
 \end{equation}
 
-（d）最后，通过$1\times1$卷积层（cv2）进行通道融合，并输出最终特征图$y$：
+（d）最后，通过 $1\times1$ 卷积层（cv2）进行通道融合，并输出最终特征图 $y$：
 \begin{equation}
     y = cv2(y_{concat})
 \end{equation}
 
-SPPC模块可以通过结合SPPF和CAM模块来有效地提取多尺度功能。
-SPPF模块通过最大池操作捕获不同尺度的上下文信息，而CAM模块通过多尺度卷积和通道融合进一步增强了特征表达能力。
+SPPC 模块可以通过结合 SPPF 和 CAM 模块来有效地提取多尺度功能。
+SPPF 模块通过最大池操作捕获不同尺度的上下文信息，而 CAM 模块通过多尺度卷积和通道融合进一步增强了特征表达能力。
 这种设计使模型能够更好地适应中小型目标的特征提取需求。
 
 \subsubsection{轻量化的卷积模块}
 
-YOLOv11的特征提取网络依靠标准卷积操作（nn.Conv2d）来提取图像的特征信息。 
-尽管YOLOv11在目标检测任务中表现出色，但其基于标准卷积层的特征提取网络在计算资源有限的设备上的计算复杂性和资源消耗方面仍存在一些缺点。 
-为了降低YOLOv11的计算复杂性和模型参数，并将精度损失最小化，本文介绍了一个轻量级卷积单元——深度可分离卷积（DSC）。 
+YOLOv11 的特征提取网络依靠标准卷积操作（nn.Conv2d）来提取图像的特征信息。 
+尽管 YOLOv11 在目标检测任务中表现出色，但其基于标准卷积层的特征提取网络在计算资源有限的设备上的计算复杂性和资源消耗方面仍存在一些缺点。 
+为了降低 YOLOv11 的计算复杂性和模型参数，并将精度损失最小化，本文介绍了一个轻量级卷积单元——深度可分离卷积（DSC）。 
 
-DSC模块的核心结构如图\ref{fig:DSC}所示。该模块主要由深度卷积、点卷积和动态重量调节模块组成。
+DSC 模块的核心结构如图 \ref{fig:DSC} 所示。该模块主要由深度卷积、点卷积和动态重量调节模块组成。
 
 （a）深度卷积是每个输入通道上的单独卷积操作。 卷积内核的数量等于输入通道的数量，每个卷积内核只作用于一个通道。 这种方法大大减少了卷积运算的计算量。 深度卷积的数学表达式是：
 \begin{equation}
@@ -238,9 +238,9 @@ DSC模块的核心结构如图\ref{fig:DSC}所示。该模块主要由深度卷�
     O_i = \sum\limits_{k\in{K}}{I_i\otimes{W_{k,i}}}
 \end{equation}
 
-公式 \ref{eq:dsc1} 中，$O_i$表示第$i$个输出通道，$I_i$表示第$i$个输入通道，$W_{k,i}$表示作用于$i$通道的卷积内核，$K$表示卷积内核的大小，$\otimes$表示卷积操作。
+公式 \ref{eq:dsc1} 中，$O_i$ 表示第 $i$ 个输出通道，$I_i$ 表示第 $i$ 个输入通道，$W_{k,i}$ 表示作用于 $i$ 通道的卷积内核，$K$ 表示卷积内核的大小，$\otimes$ 表示卷积操作。
 
-（b）点卷积是一种$1\times1$卷积操作，用于将深度卷积的输出通道数调整到目标通道数。 点卷积的数学表达式是：
+（b）点卷积是一种 $1\times1$ 卷积操作，用于将深度卷积的输出通道数调整到目标通道数。 点卷积的数学表达式是：
 \begin{equation}
     \label{eq:dsc2}
     O = \sum\limits_{i=1}^{C_{in}}I_i\otimes{W_i}
@@ -248,23 +248,23 @@ DSC模块的核心结构如图\ref{fig:DSC}所示。该模块主要由深度卷�
 
 公式 \ref{eq:dsc2} 中，$O$表示输出通道，$C_{in}$表示输入通道数，$I_i$表示第$i$个输入通道，$W_i$表示点卷积的权重。
 
-（c）为了进一步减少计算量，DSC模块引入了动态权重调整机制。 通过将输入通道划分为多个块，每个块使用共享权重参数$\alpha$来动态调整卷积内核的权重。 具体实现如代码所示。 $\alpha$参数根据块数和通道数展开，并乘以卷积内核权重来生成最终卷积权重。 动态重量调整模块的数学表达式是：
+（c）为了进一步减少计算量，DSC 模块引入了动态权重调整机制。 通过将输入通道划分为多个块，每个块使用共享权重参数 $\alpha$ 来动态调整卷积内核的权重。 具体实现如代码所示。 $\alpha$ 参数根据块数和通道数展开，并乘以卷积内核权重来生成最终卷积权重。 动态重量调整模块的数学表达式是：
 \begin{equation}
     \label{eq:dsc3}
     W_{res} = \alpha\odot{W_{net}}
 \end{equation}
 
-公式 \ref{eq:dsc3} 中，$W_{res}$表示调整后的卷积权重，$\alpha$表示动态权重参数，$W_{net}$表示原始卷积权重，$\odot$表示元素乘法。
+公式 \ref{eq:dsc3} 中，$W_{res}$ 表示调整后的卷积权重，$\alpha$ 表示动态权重参数，$W_{net}$ 表示原始卷积权重，$\odot$ 表示元素乘法。
 
-标准卷积的核心结构如图\ref{fig:nnConv}所示。标准卷积的计算可以通过以下公式来计算：
+标准卷积的核心结构如图 \ref{fig:nnConv} 所示。标准卷积的计算可以通过以下公式来计算：
 \begin{equation}
     \label{eq:conv}
     F_{conv} = {C_{in}}\times{C_{out}}\times{K^2}\times{H}\times{W}
 \end{equation}
 
-公式 \ref{eq:conv} 中，$C_{in}$表示输入通道数，$C_{out}$表示输出通道数，$K$表示卷积内核的大小，$H$和$W$表示输入特征图的高度和宽度。 
+公式 \ref{eq:conv} 中，$C_{in}$ 表示输入通道数，$C_{out}$ 表示输出通道数， $K$ 表示卷积内核的大小，$H$ 和 $W$ 表示输入特征图的高度和宽度。 
 
-DSC模块的计算体积由两部分组成，深度卷积和点卷积：
+DSC 模块的计算体积由两部分组成，深度卷积和点卷积：
 \begin{equation}
 \begin{aligned}
     F_{depth} &= {C_{in}}\times{K^2}\times{H}\times{W} \\
@@ -287,7 +287,7 @@ DSC模块的计算体积由两部分组成，深度卷积和点卷积：
 \label{eq:dsconv}
 \end{equation}
 
-通过比较方程\ref{eq:conv}和方程\ref{eq:dsconv}，可以发现DSC模块的计算量显著降低。
+通过比较方程 \ref{eq:conv} 和方程 \ref{eq:dsconv}，可以发现DSC模块的计算量显著降低。
 
 \begin{figure}[htbp]
     \centering
@@ -295,7 +295,7 @@ DSC模块的计算体积由两部分组成，深度卷积和点卷积：
         \includegraphics[width=0.7\textwidth]{../figure/nnConv.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{标准卷积模块}{Some descriptions of the pictures in question.}
+    \bicaption{标准卷积模块}{Conv Module}
     \label{fig:nnConv}
 \end{figure}
 
@@ -306,14 +306,14 @@ DSC模块的计算体积由两部分组成，深度卷积和点卷积：
     } 
     % \caption{Compared nn.Conv Module with DSC Module}
     \captionsetup{font=footnotesize}
-    \bicaption{DSC卷积模块}{Some descriptions of the pictures in question.}
+    \bicaption{DSC 卷积模块}{DSC Module}
     \label{fig:DSC}
 \end{figure}
 
-SimAM（Simple Attention Module）是一个简单且无参数的注意力模块\cite{simam}。 
-SimAM通过推断特征图的3D注意力权重并优化能量函数来找出每个神经元的重要性，从而提高了各种视觉任务的性能。
-SimAM通过计算特征图中每个位置的激活值与整体特征之间的相似性来动态调整每个位置的特征权重。
-与传统的注意力机制相比，SimAM不依赖额外的卷积层或池操作，计算复杂性低，并且易于集成到现有的网络架构中。
+SimAM（Simple Attention Module）是一个简单且无参数的注意力模块 \cite{simam}。 
+SimAM 通过推断特征图的3D注意力权重并优化能量函数来找出每个神经元的重要性，从而提高了各种视觉任务的性能。
+SimAM 通过计算特征图中每个位置的激活值与整体特征之间的相似性来动态调整每个位置的特征权重。
+与传统的注意力机制相比，SimAM 不依赖额外的卷积层或池操作，计算复杂性低，并且易于集成到现有的网络架构中。
 
 SimAM的实现基于简单的数学运算，设输入特征图$x\in{R^{{B}\times{C}\times{H}\times{W}}}$，其中$B$、$C$、$H$和$W$分别表示批次数、通道数、高度和宽度。其核心公式如下：
 
@@ -323,7 +323,7 @@ SimAM的实现基于简单的数学运算，设输入特征图$x\in{R^{{B}\times
     \mu_c = \frac{1}{{H}\times{W}}\sum\limits_{i=1}^{H}\sum\limits_{j=1}^{W}x_{c,i,j}
 \end{equation}
 
-公式 \ref{eq:simam1} 中，$\mu_c$表示$c$通道的平均值。
+公式 \ref{eq:simam1} 中，$\mu_c$ 表示 $c$ 通道的平均值。
 
 （b）计算每个位置的激活值与通道平均值之间的相似性：
 \begin{equation}
@@ -331,80 +331,80 @@ SimAM的实现基于简单的数学运算，设输入特征图$x\in{R^{{B}\times
     y_{c,i,j} = \frac{(x_{c,i,j}-\mu_c)^2}{4\left(\sum_{k=1}^{H}\sum_{l=1}^{W}(x_{c,i,j}-\mu_c)^2/n+\lambda \right)}+0.5
 \end{equation}
 
-公式 \ref{eq:simam2} 中，$n={H}\times{W}-1$，$\lambda$是一个非常小的正则化常数，用于避免分母为$0$。
+公式 \ref{eq:simam2} 中，$n={H}\times{W}-1$，$\lambda$ 是一个非常小的正则化常数，用于避免分母为$0$。
 
-（c）使用Sigmoid激活函数将相似性归一化，并将归一化相似性作为输入特征图的权重应用。
+（c）使用 Sigmoid 激活函数将相似性归一化，并将归一化相似性作为输入特征图的权重应用。
 \begin{equation}
     \label{eq:simam3}
     output_{c,i,j} = x_{c,i,j} \cdot \sigma(y_{c,i,j})
 \end{equation}
 
-DBSS模块连接DSC卷积单元和SimAM注意模块，以实现轻量级卷积计算和集成SimAM注意模块的轻量级模块。
+DBSS 模块连接 DSC 卷积单元和 SimAM 注意模块，以实现轻量级卷积计算和集成SimAM注意模块的轻量级模块。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{../figure/SimAM.png}
     \captionsetup{font=footnotesize}
-    \bicaption{SamAM 模块}{Some descriptions of the pictures in question.}
+    \bicaption{SamAM 模块}{SimAM Module}
     \label{fig:SimAM}
 \end{figure}
 
 \subsubsection{更高效的损失函数}
 
-在无人机的目标检测任务中，目标通常具有体积小、特征不显眼、背景复杂等特点，这对目标检测算法提出了更高的要求。 在处理小目标时，传统的IoU损失函数有一定的局限性。
-IoU损失函数只考虑预测框和真实框之间的重叠区域。 对于小目标，预测框和真实框之间的小偏差可能会导致大的定位误差，而IoU损失函数对这些偏差不太敏感。
+在无人机的目标检测任务中，目标通常具有体积小、特征不显眼、背景复杂等特点，这对目标检测算法提出了更高的要求。 在处理小目标时，传统的 IoU 损失函数有一定的局限性。
+IoU 损失函数只考虑预测框和真实框之间的重叠区域。 对于小目标，预测框和真实框之间的小偏差可能会导致大的定位误差，而 IoU 损失函数对这些偏差不太敏感。
 
-为了进一步提高小目标的检测性能，我们引入了NWD框损耗函数，并将其与DIoU箱损耗功能相结合。
-NWD损失函数可以通过计算预测框和真实框之间的空间和规模差异来更准确地评估预测框和真实框之间的相似性，从而提高模型捕捉小目标的能力。
+为了进一步提高小目标的检测性能，我们引入了 NWD 损失函数，并将其与 DIoU 损失函数相结合。
+NWD 损失函数可以通过计算预测框和真实框之间的空间和规模差异来更准确地评估预测框和真实框之间的相似性，从而提高模型捕捉小目标的能力。
 
-DIoU损失函数基于IoU损失函数的改进版本，其核心的想法是通过引入预测框和真实框中心点之间的距离来提高损失函数对空间位置的敏感性。
+DIoU 损失函数基于 IoU 损失函数的改进版本，其核心的想法是通过引入预测框和真实框中心点之间的距离来提高损失函数对空间位置的敏感性。
 具体定义如下：
 \begin{equation}
     \label{eq:diou}
     L_{DIoU} = 1 - \frac{A\cap{B}}{A\cup{B}} + \frac{\rho^2(c_p, c_g)}{c^2}
 \end{equation}
-公式 \ref{eq:diou} 中，$A\cap{B}$表示预测框和真实框的交集面积，$A\cup{B}$表示预测框和真实框的并集面积，$\rho^2(c_p, c_g)$表示预测框的中心点$c_p$和真实框的中心点$c_g$之间的欧几里得举例，$c$表示可以覆盖预测框和真实框最小闭合的对角线长度。
+公式 \ref{eq:diou} 中，$A\cap{B}$ 表示预测框和真实框的交集面积，$A\cup{B}$ 表示预测框和真实框的并集面积，$\rho^2(c_p, c_g)$ 表示预测框的中心点 $c_p$ 和真实框的中心点 $c_g$ 之间的欧几里得举例，$c$ 表示可以覆盖预测框和真实框最小闭合的对角线长度。
 
-NWD框损失函数是通过计算预测框和真实框之间的空间和规模差异来评估的。 两者之间的相似性。
+NWD 损失函数是通过计算预测框和真实框之间的空间和规模差异来评估的。 两者之间的相似性。
 具体定义如下：
-给定预测框$\mathbf{p}$和地面真理边界框$\mathbf{g}$，其中心坐标是$\mathbf{c}_p = (x_p, y_p)$和$\mathbf{c}_g = (x_g, y_g)$，宽度和高度分别为$(w_p, h_p)$和$(w_g, h_g)$。 NWD损失函数的定义是：
+给定预测框 $\mathbf{p}$ 和真实边界框 $\mathbf{g}$ ，其中心坐标是 $\mathbf{c}_p = (x_p, y_p)$ 和 $\mathbf{c}_g = (x_g, y_g)$，宽度和高度分别为 $(w_p, h_p)$ 和 $(w_g, h_g)$。 NWD 损失函数的定义是：
 \begin{equation}
     L_{NWD} = \exp\left(-\frac{\sqrt{D_W}}{c}\right)
     \label{eq:nwd}
 \end{equation}
 
-公式 \eqref{eq:nwd} 中，Wasserstein距离$D_W$是：
+公式 \eqref{eq:nwd} 中，Wasserstein距离 $D_W$ 是：
 \begin{equation}
     D_W = (\Delta x)^2 + (\Delta y)^2 + \frac{(w_p - w_g)^2 + (h_p - h_g)^2}{4} + \epsilon
     \label{eq:dw}
 \end{equation}
 
-公式 \eqref{eq:dw} 中，$\Delta x = x_p - x_g$，$\Delta y = y_p - y_g$，$\epsilon$是一个非常小的常数，以避免除法错误，$c$是用于调整距离变焦的常数。以DIoU损失函数和NWD盒子损失函数之和作为YOLOv11的盒子损失函数：
+公式 \eqref{eq:dw} 中，$\Delta x = x_p - x_g$，$\Delta y = y_p - y_g$，$\epsilon$ 是一个非常小的常数，以避免除法错误，$c$ 是用于调整距离变焦的常数。以 DIoU 损失函数和 NWD 损失函数之和作为 YOLOv11 的盒子损失函数：
 \begin{equation}
     L_{box\_loss} = \frac{L_{DIoU}+L_{NWD}}{2}
 \end{equation}
 
-通过将DIoU损失函数和NWD损失函数相加来取平均值，我们可以进一步提高模型对小目标的检测能力，同时保持大多数目标的DIoU损失函数的检测性能。
+通过将 DIoU 损失函数和 NWD 损失函数相加来取平均值，我们可以进一步提高模型对小目标的检测能力，同时保持大多数目标的 DIoU 损失函数的检测性能。
 这种组合可以充分利用两种损失函数的优势，从而提高模型的整体检测性能。
 
 
 \subsection{交通目标检测实验结果和分析}
 
-新算法在TT100K数据集\cite{tt100k}和VisDrone数据集\cite{vd}上进行训练和测试，以改进每个阶段，并与YOLOv11s\cite{yolov11}进行比较。
-为了在不降低其他比例目标的精度的情况下通过算法验证不同尺寸目标的检测精度，对TT100K和VisDrone的数据集进行了比较实验。
-最后，在不同场景中选择复杂的场景图片，并将拟议算法的检测效果与实际场景中的YOLOv11s、YOLOv10s\cite{yolov10}和YOLOv9s\cite{yolov9}算法进行比较。
+新算法在 TT100K 数据集\cite{tt100k}和 VisDrone 数据集\cite{vd}上进行训练和测试，以改进每个阶段，并与 YOLOv11s\cite{yolov11} 进行比较。
+为了在不降低其他比例目标的精度的情况下通过算法验证不同尺寸目标的检测精度，对 TT100K 和 VisDrone 的数据集进行了比较实验。
+最后，在不同场景中选择复杂的场景图片，并将拟议算法的检测效果与实际场景中的 YOLOv11s、YOLOv10s\cite{yolov10}和YOLOv9s\cite{yolov9}算法进行比较。
 
 \subsubsection{数据集}
 
 在目标检测领域，特别是对无人机小目标检测任务的研究，选择适当的数据集对于验证算法的性能至关重要。
-这个实验采用了两个数据集，TT100K和VisDrone。
-为了评估改进的YOLOv11算法，小目标检查测量任务的性能提供了强大的支持。
+这个实验采用了两个数据集，TT100K 和 VisDrone。
+为了评估改进的 YOLOv11 算法，小目标检查测量任务的性能提供了强大的支持。
 
-TT00K数据集由中国清华大学和腾讯团队收集。
+TT00K 数据集由中国清华大学和腾讯团队收集。
 数据集由无人机获得，是交通标志的目标识别数据集；它是在不同的场景、天气和光线下收集的，因此在复杂的环境中有许多小目标。
 数据集还提供了一些属性，如场景可见性、对象类和遮挡。
-图\ref{fig:tt100k_figure}显示了TT100K数据集中的一些数据。
-从图\ref{fig:tt100k_figure}中可以看出，TT100K数据集中的小目标数量很小，分布不均匀，分布不在中心，并且有许多目标类别。
+图 \ref{fig:tt100k_figure} 显示了 TT100K 数据集中的一些数据。
+从图 \ref{fig:tt100k_figure} 中可以看出，TT100K 数据集中的小目标数量很小，分布不均匀，分布不在中心，并且有许多目标类别。
 
 \begin{figure}[htbp]
     \centering
@@ -412,14 +412,14 @@ TT00K数据集由中国清华大学和腾讯团队收集。
     \includegraphics[width=0.8\textwidth]{../figure/TT100K.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{TT100K 数据集}{Some descriptions of the pictures in question.}
+    \bicaption{TT100K 数据集}{TT100K Dataset}
     \label{fig:tt100k_figure}
 \end{figure}
 
-VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团队创建的大规模基准数据集，专为无人机图像和视频分析中的各种计算机视觉任务而设计。
+VisDrone 数据集是天津大学机器学习和数据挖掘实验室 AISKYEYE 团队创建的大规模基准数据集，专为无人机图像和视频分析中的各种计算机视觉任务而设计。
 它包含288个视频剪辑、261,908帧图像和10,209个静态图像，涵盖了不同城市、环境、物体和密度的场景，并在各种天气和照明条件下收集。
-图\ref{fig:vd_figure}显示了VisDrone数据集中的一些数据。
-从图\ref{fig:vd_figure}中可以观察到，VisDrone数据集有大量的小目标和很少的目标类别。
+图\ref{fig:vd_figure}显示了 VisDrone 数据集中的一些数据。
+从图\ref{fig:vd_figure}中可以观察到，VisDrone 数据集有大量的小目标和很少的目标类别。
 
 \begin{figure}[htbp]
     \centering
@@ -427,18 +427,18 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
     \includegraphics[width=0.8\textwidth]{../figure/VisDrone.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{VisDrone 数据集}{Some descriptions of the pictures in question.}
+    \bicaption{VisDrone 数据集}{VisDrone Dataset}
     \label{fig:vd_figure}
 \end{figure}
 
-虽然TT100K和VisDrone数据集不是直接基于无人机视角，但它们包含的目标类型与无人机在实际应用中需要识别的目标高度一致。
+虽然 TT100K 和 VisDrone 数据集不是直接基于无人机视角，但它们包含的目标类型与无人机在实际应用中需要识别的目标高度一致。
 交通标志是交通检查、智能交通和其他领域中无人机的重要识别对象，而人、自行车、摩托车和汽车是安全监控、城市交通管理和其他场景中无人机的关键检测目标。
-通过对这些数据集进行实验，可以间接评估改进的YOLOv11算法在无人驾驶飞行器小型目标检测任务中的潜力和优势。
+通过对这些数据集进行实验，可以间接评估改进的 YOLOv11 算法在无人驾驶飞行器小型目标检测任务中的潜力和优势。
 与此同时，这些数据集的复杂场景和多样化的样本也为算法的泛化能力和鲁棒性测试提供了良好的基础，这有利于在不同情况下发现算法的优缺点，并为进一步优化算法以满足无人机的实际应用需求提供了重要的参考。
 
 \subsubsection{实验环境}
 
-本文中用于实验的系统、系统硬件设施和软件平台如表\ref{tab:environment}所示。
+本文中用于实验的系统、系统硬件设施和软件平台如表 \ref{tab:environment}所示。
 \begin{table}[htbp]
     \centering
     \captionsetup{font=footnotesize}
@@ -460,13 +460,13 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
 
 \subsubsection{实验结果和分析}
 
-在这项研究中，我们通过比较实验评估了EX-YOLO模型（our）在2个不同数据集中，包括TT100K和VisDrone数据集上的性能，以验证小目标检测和多尺度目标检测的改进方法的有效性。
-通过将其与基准模型YOLOv11s、YOLOv10s和YOLOv9s进行比较，评估改进模型在各种指标上的性能。
+在这项研究中，我们通过比较实验评估了 EX-YOLO模型（our） 在2个不同数据集中，包括 TT100K 和 VisDrone 数据集上的性能，以验证小目标检测和多尺度目标检测的改进方法的有效性。
+通过将其与基准模型 YOLOv11s、YOLOv10s 和 YOLOv9s 进行比较，评估改进模型在各种指标上的性能。
 
 \begin{table}[htbp]
     \centering
     \captionsetup{font=footnotesize}
-    \bicaption{在TT100K数据集上的对比实验结果}{Symbol cross-reference table}
+    \bicaption{在 TT100K 数据集上的对比实验结果}{Symbol cross-reference table}
     \label{tab:compare_studies_tt100k}
     \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.1\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
         \toprule
@@ -495,7 +495,7 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v9s_confusion_matrix_normalized.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在TT100K数据集上的归一化混淆矩阵}{Symbol cross-reference table}
+    \bicaption{不同的网络模型在 TT100K 数据集上的归一化混淆矩阵}{The normalized confusion matrix of different network models on the TT100K dataset.}
     \label{fig:tt100k_cmn}
 \end{figure}
 
@@ -514,11 +514,11 @@ VisDrone数据集是天津大学机器学习和数据挖掘实验室AISKYEYE团�
             \includegraphics[width=0.4\textwidth]{../figure/tt100k_v9s_F1_curve.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在TT100K数据集上的F1得分}{Symbol cross-reference table}
+    \bicaption{不同的网络模型在 TT100K 数据集上的 F1 得分}{F1 scores of different network models on the VidDrone dataset.}
     \label{fig:tt100k_f1}
 \end{figure}
 
-在表 \ref{tab:compare_studies_tt100k} 中，从模型参数来看，YOLOv9s参数容量是最小的，只有7.5MB，而改进后的模型参数容量相对较大，为11.4MB。
+在表 \ref{tab:compare_studies_tt100k} 中，从模型参数来看，YOLOv9s 参数容量是最小的，只有7.5MB，而改进后的模型参数容量相对较大，为11.4MB。
 虽然our 模型在参数方面有所增加，但在计算量（GFLOP）方面显示出显著优势。
 它的计算量只有17.0GFLOPs，远远低于YOLOv11s的21.8GFLOPs、YOLOv10s的25.4GFLOPs和YOLOv9s的27.2GFLOPs。
 这表明our 模型在设计中更加关注计算效率。
@@ -572,7 +572,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
             \includegraphics[width=0.4\textwidth]{../figure/vd_v9s_confusion_matrix_normalized.png}
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在VisDrone数据集上的归一化混淆矩阵}{Symbol cross-reference table}
+    \bicaption{不同的网络模型在VisDrone数据集上的归一化混淆矩阵}{The normalized confusion matrix of different network models on the VisDrone dataset.}
     \label{fig:vd_cmn}
 \end{figure}
 
@@ -591,7 +591,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
         \includegraphics[width=0.4\textwidth]{../figure/vd_v9s_F1_curve.png}
     }
     \captionsetup{font=footnotesize}
-    \bicaption{不同的网络模型在VidDrone数据集上的F1得分}{Symbol cross-reference table}
+    \bicaption{不同的网络模型在VidDrone数据集上的F1得分}{F1 scores of different network models on the VidDrone dataset.}
     \label{fig:vd_f1}
 \end{figure}
 
@@ -607,7 +607,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
 
 从$mAP_{0.5}$的主要性能指数来看，our 模型达到了0.390，与YOLOv10s相同，高于YOLOv11s的0.383，略低于YOLOv9s的0.402。 虽然YOLOv9s的mAP最高，但其计算量也是最大的，这在一定程度上限制了其在实际应用中的可行性。 相比之下，our 模型仍然保持高mAP，同时有效减少计算量，这反映了改进算法在提高检测精度方面的优势。 在无人机的小目标检测任务中，关键是准确识别各种目标。 our 模型可以在复杂的场景中更好地完成这项任务，这对于提高无人驾驶飞行器在实际应用中的可靠性和有效性具有重要意义。
 
-至于FPS，FPS受到硬件的极大影响。 我们的型号是68.5，低于YOLOv11的82.6和YOLOv10的78.1，但高于YOLOv9的62.1。 our 模型可以实现相对可观的FPS，同时保持低计算量和高mAP，这表明它在处理速度方面也具有竞争力。
+至于FPS，FPS受到硬件的极大影响。 our 模型是68.5，低于YOLOv11的82.6和YOLOv10的78.1，但高于YOLOv9的62.1。 our 模型可以实现相对可观的FPS，同时保持低计算量和高mAP，这表明它在处理速度方面也具有竞争力。
 
 从mAP的角度来看，YOLOv9s的mAP是最高的（0.402），这与其较高的F1 AUC一致。 我们模型的mAP是0.390，与YOLOv10s相同，但F1 AUC略低。 这表明，尽管our 模型在平均精度上与YOLOv10s相当，但不同F1分数水平的综合性能不如YOLOv10s稳定。 F1曲线的差异可能反映了我们模型在某些F1分数区间中的性能波动。
 
@@ -653,7 +653,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
 
 在表 \ref{tab:ablation_studies_vd} 中，在VisDrone数据集中，以YOLOv11s（base）为起点，在引入NWD损失函数后，$mAP_{0.5}$从0.383增加到0.386，增加了0.7\%，精度从0.485增加到0.498，召回率保持不变。 计算量和参数保持不变，FPS略低，这对计算效率影响不大。 添加SPPC模块后，$mAP_{0.5}$达到0.392，增加2.4\%，精度提高到0.527，召回率降低但检测性能提高，参数增加到11.4MB，计算量增加到26.0GFLOPs，增加22\%，FPS显著下降，提高检测性能但增加计算资源要求。 最后，引入了DBSS模块，计算量减少到15.4GFLOPs，减少了27\%，$mAP_{0.5}$略微减少到0.390，但仍比基础高出2\%。 精度和召回率保持在良好的水平，FPS反弹，表明DBSS模块有效地减少了计算量，同时保持了检测性能并改进了模块。 复杂场景下的运营效率和适应性。
 
-基于表 \ref{tab:ablation_studies_tt100k} 和表 \ref{tab:ablation_studies_vd} 的i消融实验结果，NWD损失函数在一定程度上提高了模型对小目标的检测性能，特别是在提高召回率方面，这在无人机小目标的检测任务中发挥了积极作用；SPPC该模块显著增强了模型的特征提取和识别能力，大大提高了$mAP_{0.5}$，但也增加了模型的计算量和参数规模；DBSS模块在减少模型计算量方面取得了显著效果，可以在保持高检测性能的同时减少计算资源的消耗。 消耗和提高模型的运行效率对于平衡无人驾驶飞行器在实际应用中的检测精度和计算效率具有关键意义。 通过这些减值实验，我们在不同数据集和小目标检测场景下验证了拟议改进模块的有效性，这为改进YOLOv11算法以增强无人机的小目标检测性能提供了强有力的支持和重要参考。
+基于表 \ref{tab:ablation_studies_tt100k} 和表 \ref{tab:ablation_studies_vd} 的消融实验结果，NWD损失函数在一定程度上提高了模型对小目标的检测性能，特别是在提高召回率方面，这在无人机小目标的检测任务中发挥了积极作用；SPPC该模块显著增强了模型的特征提取和识别能力，大大提高了$mAP_{0.5}$，但也增加了模型的计算量和参数规模；DBSS模块在减少模型计算量方面取得了显著效果，可以在保持高检测性能的同时减少计算资源的消耗。 消耗和提高模型的运行效率对于平衡无人驾驶飞行器在实际应用中的检测精度和计算效率具有关键意义。 通过这些减值实验，我们在不同数据集和小目标检测场景下验证了拟议改进模块的有效性，这为改进YOLOv11算法以增强无人机的小目标检测性能提供了强有力的支持和重要参考。
 
 为了直观地看到EX-YOLO的检测效果，选择了两组复杂的场景图进行测试。 使用EX-YOLO、YOLOv11s、YOLOv10s和YOLOv9s的加权文件被保留并用于测试和比较。 图像选择标准包括具有不同尺寸和重叠目标的复杂场景。 基于上述要求，可以清楚地看到EX-YOLO、YOLOv11s、YOLOv10s和YOLOv9s之间的差异。 其中，图\ref{fig:tt100k_compare_1}
 % 和图\ref{fig:tt100k_compare_2}
@@ -677,7 +677,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
             \includegraphics[width=0.45\textwidth]{../figure/v9s_tt100k_44171.jpg}%
         }
     \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在TT100K数据集上的推理结果}{Some descriptions of the pictures in question.}
+    \bicaption{不同网络模型在TT100K数据集上的推理结果}{Reasoning results of different network models on TT100K dataset.}
     \label{fig:tt100k_compare_1}
 \end{figure}
 
@@ -719,7 +719,7 @@ FPS受到硬件的极大影响，但就相对价值而言，我们模型的FPS�
         \subfloat[YOLOv9s\label{fig:vd_1_9}]{%
         \includegraphics[width=0.48\textwidth]{../figure/v9s_VisDrone_0000151_00348_d_0000133.jpg}}
     \captionsetup{font=footnotesize}
-    \bicaption{不同网络模型在VisDrone数据集上的推理结果}{Some descriptions of the pictures in question.}
+    \bicaption{不同网络模型在 VisDrone 数据集上的推理结果}{Reasoning results of different network models on VisDrone dataset.}
     \label{fig:vd_compare_1}
 \end{figure}
 
