@@ -322,6 +322,21 @@ Dense-Haze 是一个用于图像去雾研究的高质量数据集，由 CVL 于 
 在这项研究中，本节通过比较实验评估了 CGANFormer 模型（our）在2个不同数据集中，包括 NYU2 和 Dense-Haze 数据集上的性能，以验证图像去雾还原的改进方法的有效性。
 通过将其与模型 AODNet、FFA-Net、GCANet 进行比较，评估改进模型在各种指标上的性能。
 
+% \begin{table}[H]
+%     \centering
+%     \captionsetup{font=footnotesize}
+%     \bicaption{在 NYU2 数据集上的对比实验结果}{Symbol cross-reference table}
+%     \label{tab:compare_studies_nyu2}
+%     \begin{tabular}{p{0.16\textwidth}p{0.16\textwidth}p{0.16\textwidth}p{0.16\textwidth}p{0.16\textwidth}}
+%         \toprule
+%         性能指标 & AODNet  & FFA-Net & GCANet & our   \\ 
+%         \midrule
+%         PSNR    & 15.2885 & 15.0506 & 16.2655 & 18.9122 \\
+%         SSIM    & 0.8880  & 0.6934  & 0.7057  & 0.7408  \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}
+
 \begin{table}[H]
     \centering
     \captionsetup{font=footnotesize}
@@ -331,12 +346,11 @@ Dense-Haze 是一个用于图像去雾研究的高质量数据集，由 CVL 于 
         \toprule
         性能指标 & AODNet  & FFA-Net & GCANet & our   \\ 
         \midrule
-        PSNR    & 15.2885 & 15.0506 & 16.2655 & 18.9122 \\
-        SSIM    & 0.8880  & 0.6934  & 0.7057  & 0.7408  \\
+        PSNR    & 19.4356 & 15.0506 & 16.2655 & 21.0121 \\
+        SSIM    & 0.8854  & 0.6934  & 0.7057  & 0.9426  \\
         \bottomrule
     \end{tabular}
 \end{table}
-
 \begin{table}[H]
     \centering
     \captionsetup{font=footnotesize}
@@ -353,7 +367,7 @@ Dense-Haze 是一个用于图像去雾研究的高质量数据集，由 CVL 于 
 \end{table}
 
 表 \ref{tab:compare_studies_nyu2} 和表 \ref{tab:compare_studies_dh} 展示了 AODNet、FFA-Net、GCANet 和 our 模型在不同数据集上的去雾性能。
-在 NYU2 数据集上，从 PSNR 指标来看，our 模型的 PSNR 值达到 18.9122，相较于其他模型具有显著优势。AODNet 的 PSNR 为 15.2885，GCANet 为 16.2655，而 FFA-Net 仅为 15.0506。这意味着 our 模型在图像去雾后，能够更好地保留图像的细节信息，减小重建误差，使得去雾后的图像与原始清晰图像在像素值上更接近。从 SSIM 指标来看，our 模型的 SSIM 值为 0.7408，同样优于其他模型。AODNet 的 SSIM 为 0.8880，看似较高，但需要结合 PSNR 综合考量，而 GCANet 为 0.7057，FFA-Net 仅为 0.6934。SSIM 更关注图像的结构信息相似性，our 模型在这一指标上的优异表现表明其能够更有效地恢复图像的结构特征，使去雾后的图像在视觉上更接近真实场景，保持了图像的空间结构连贯性和完整性。
+在 NYU2 数据集上，从 PSNR 指标来看，our 模型的 PSNR 值达到 21.0121，相较于其他模型具有显著优势。AODNet 的 PSNR 为 19.4356，GCANet 为 16.2655，而 FFA-Net 仅为 15.0506。这意味着 our 模型在图像去雾后，能够更好地保留图像的细节信息，减小重建误差，使得去雾后的图像与原始清晰图像在像素值上更接近。从 SSIM 指标来看，our 模型的 SSIM 值为 0.9426，同样优于其他模型。AODNet 的 SSIM 为 0.8854，看似较高，但需要结合 PSNR 综合考量，而 GCANet 为 0.7057，FFA-Net 仅为 0.6934。SSIM 更关注图像的结构信息相似性，our 模型在这一指标上的优异表现表明其能够更有效地恢复图像的结构特征，使去雾后的图像在视觉上更接近真实场景，保持了图像的空间结构连贯性和完整性。
 
 在 Dense-Haze 数据集上，our 模型依然展现出了卓越的性能。对于 PSNR 指标，our 模型的 PSNR 为 16.8625，高于 AODNet 的 14.0461、FFA-Net 的 15.0360 和 GCANet 的 15.4409。这说明在应对 Dense-Haze 数据集中更复杂的浓雾场景时，our 模型能够更精准地还原图像细节，降低噪声干扰，提升图像的质量。在 SSIM 方面，our 模型的 SSIM 值为 0.5879，分别超过了 FFA-Net 的 0.4496 和 GCANet 的 0.5036，但低于 AODNet 的 0.5897。这表明 our 模型在处理浓雾图像时，能够更好地捕捉和保留图像的结构信息，使得去雾后的图像在结构层面与原始图像的相似度更高，为后续的图像分析和应用提供了更可靠的图像基础。
 
@@ -414,21 +428,21 @@ Dense-Haze 是一个用于图像去雾研究的高质量数据集，由 CVL 于 
 
 接下来通过比较实验评估了 CGF-YOLO模型（our）在2个不同数据集中，包括 FOG-TT100K 和 FOG-VisDrone 数据集上的性能，以验证小目标检测和多尺度目标检测的改进方法的有效性。
 FOG-TT100K 和 FOG-VisDrone 数据集是 TT100K 和 VisDrone 数据集人工添加了合成雾后的数据集，能够反映在雾天的交通场景下的表现。
-通过将其与YOLOv11s、YOLOv10s和YOLOv9模型进行比较，评估改进模型在各种指标上的性能。
+通过将其与YOLOv11s、YOLOv10s和YOLOv9s模型进行比较，评估改进模型在各种指标上的性能。
 
 \begin{table}[H]
     \centering
     \captionsetup{font=footnotesize}
     \bicaption{在 FOG-TT100K 数据集上的对比实验结果}{Symbol cross-reference table}
     \label{tab:compare_studies_fogtt100k}
-    \begin{tabular}{p{0.13\textwidth}p{0.12\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.09\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
+    \begin{tabular}{p{0.16\textwidth}p{0.15\textwidth}p{0.16\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
         \toprule
-        模型         & 图像大小 & 参数量 MB & 计算量 GFLOPs & $mAP_{0.5}$   & P     & R     \\ 
+        模型         & 图像大小 & 参数量 MB & $mAP_{0.5}$   & P     & R     \\ 
         \midrule
-        YOLOv11s     & 400     & 9.5     & 21.8          & 0.453        & 0.615  & 0.280 \\
-        YOLOv10s     & 400     & 8.2     & 25.4          & 0.414        & 0.570  & 0.249 \\
-        YOLOv9s      & 400     & 7.5     & 27.2          & 0.501        & 0.666  & 0.328 \\
-        \textbf{our} & 400     & 11.4    & \textbf{17.0} & 0.592        & 0.699  & 0.449 \\
+        YOLOv11s     & 400     & 9.5     & 0.453         & 0.615  & 0.280 \\
+        YOLOv10s     & 400     & 8.2     & 0.414         & 0.570  & 0.249 \\
+        YOLOv9s      & 400     & 7.5     & 0.501         & 0.666  & 0.328 \\
+        \textbf{our} & 400     & 11.4    & \textbf{0.592} & 0.699  & 0.449 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -488,23 +502,39 @@ FOG-TT100K 和 FOG-VisDrone 数据集是 TT100K 和 VisDrone 数据集人工添�
 图 \ref{fig:fogtt100k_f1} 展示了不同模型的F1得分曲线。our 模型的mAP是最高的（0.592），这与其高F1 得分一致。 our 模型的F1 得分高于YOLOv9s、YOLOv11s和YOLOv10s。 这表明，our 模型在平均精度上好于其他YOLO模型。 F1曲线的高性能与our模型的精度和召回率之间的良好平衡有关。 
 
 
+% \begin{table}[H]
+%     \centering
+%     \captionsetup{font=footnotesize}
+%     \bicaption{在 FOG-VisDrone 数据集上的对比实验结果}{Symbol cross-reference table}
+%     \label{tab:compare_studies_fogvd}
+%     \begin{tabular}{p{0.13\textwidth}p{0.12\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.09\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
+%         \toprule
+%         模型         & 图像大小 & 参数量 MB & 计算量 GFLOPs  & $mAP_{0.5}$     & P     & R     \\  
+%         \midrule
+%         YOLOv11s     & 400     & 9.4   & 21.3          & 0.339           & 0.631  & 0.049 \\
+%         YOLOv10s     & 400     & 8.0   & 24.5          & 0.364           & 0.674  & 0.054 \\
+%         YOLOv9s      & 400     & 7.2   & 26.7          & 0.348           & 0.642  & 0.055 \\
+%         \textbf{our} & 400     & 11.4  & \textbf{15.4} & \textbf{0.397}  & 0.721  & 0.074 \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}
+
 \begin{table}[H]
     \centering
     \captionsetup{font=footnotesize}
     \bicaption{在 FOG-VisDrone 数据集上的对比实验结果}{Symbol cross-reference table}
     \label{tab:compare_studies_fogvd}
-    \begin{tabular}{p{0.13\textwidth}p{0.12\textwidth}p{0.13\textwidth}p{0.19\textwidth}p{0.09\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
+    \begin{tabular}{p{0.16\textwidth}p{0.15\textwidth}p{0.16\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
         \toprule
-        模型         & 图像大小 & 参数量 MB & 计算量 GFLOPs  & $mAP_{0.5}$     & P     & R     \\  
+        模型         & 图像大小 & 参数量 MB & $mAP_{0.5}$     & P     & R     \\  
         \midrule
-        YOLOv11s     & 400     & 9.4   & 21.3          & 0.339           & 0.631  & 0.049 \\
-        YOLOv10s     & 400     & 8.0   & 24.5          & 0.364           & 0.674  & 0.054 \\
-        YOLOv9s      & 400     & 7.2   & 26.7          & 0.348           & 0.642  & 0.055 \\
-        \textbf{our} & 400     & 11.4  & \textbf{15.4} & \textbf{0.397}  & 0.721  & 0.074 \\
+        YOLOv11s     & 400     & 9.4   & 0.339           & 0.631  & 0.049 \\
+        YOLOv10s     & 400     & 8.0   & 0.364           & 0.674  & 0.054 \\
+        YOLOv9s      & 400     & 7.2   & 0.348           & 0.642  & 0.055 \\
+        \textbf{our} & 400     & 11.4  & \textbf{0.397}  & 0.721  & 0.074 \\
         \bottomrule
     \end{tabular}
 \end{table}
-
 
 \begin{figure}[H]
     \centering

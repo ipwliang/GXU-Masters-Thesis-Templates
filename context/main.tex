@@ -8,15 +8,15 @@
 \input{ADS_Expand}
 
 % 拟定文章的标题
-\newcommand{\ArticleTitle}{无人机在雾天交通场景的目标检测算法研究}
-\newcommand{\ArticleTitleEn}{Research on the target detection algorithm of drone traffic scenes in foggy days}
+\newcommand{\ArticleTitle}{基于改进 YOLO 算法的雾天交通小目标检测技术研究}
+\newcommand{\ArticleTitleEn}{Research on Foggy Traffic Small Object Detection Technology Based on Improved YOLO Algorithm}
 
 \begin{document}
 
 % 加载封面；封面需要自己修改word模板后导出为pdf文件
 \setcounter{page}{1} % 重置页码
 \pagenumbering{roman}
-% \includepdf[pages={-}]{毕业论文封面.pdf}
+\includepdf[pages={-}]{毕业论文封面.pdf}
 
 
 % 设置摘要、目录部分页码
@@ -37,10 +37,10 @@
 % R：页面右边; L：页面左边; C：页面中间
 \pagestyle{fancy}%清除原页眉页脚样式
 \fancyhf{}
-% \fancyhead[L]{\lishu \fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文}
-\fancyhead[L]{\fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文} %\leftmark：表示“一级标题”
+\fancyhead[L]{\lishu \fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文}
+% \fancyhead[L]{\fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文} %\leftmark：表示“一级标题”
 % \fancyhead[C]{\rightmark} %\rightmark：表示“二级标题”
-\fancyhead[R]{\fontsize{12pt}{15pt}\selectfont \ArticleTitle}%\thepage:表示“页码”
+\fancyhead[R]{\lishu \fontsize{12pt}{15pt}\selectfont \ArticleTitle}%\thepage:表示“页码”
 \fancyfoot[C]{\thepage} % 在页脚中间添加页码
 %% ------------------------------ %%
 
@@ -61,13 +61,13 @@
 \newpage
 
 \pagebreak
-{\zihao{5}\bibliography{references}}
+{\zihao{-4}\bibliography{references}}
 \pagebreak
 
 % \input{7附录}
 % \pagebreak
 
-% \input{8研究成果清单.tex}
-% \pagebreak
+\input{8研究成果清单}
+\pagebreak
 
 \end{document}
