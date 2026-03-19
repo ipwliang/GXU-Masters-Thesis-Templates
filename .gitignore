@@ -1,8 +1,11 @@
 .DS_Store
 .DS_Store/
 
+figures/
 *.jpg
 *.jpeg
+*.png
+
 
 *.aux
 *.bbl

@@ -1,25 +1,29 @@
 %加载并设置宏包
 %广西大学物理学院2021级硕士王信哲制作
+% 广西大学计电学院2022级硕士IPWL修改
 \ctexset{
-	bibname = 参考文献,
-	contentsname=\heiti\zihao{3} 目\ 录,
-	section={
-		name={第,章},number=\chinese{section},
-		format=\heiti\bfseries\centering\zihao{3}\linespread{1.25},
-		beforeskip=20pt,%18ex plus 0.2ex minus .2ex,
-		afterskip=20pt%18ex plus 0.2ex minus .2ex
-	},
-	subsection={
-		format=\heiti\bfseries\raggedright\zihao{4}\linespread{1.25},
-		beforeskip=8.75pt,%18ex plus 0.1ex minus .1ex,
-		afterskip=8.75pt%18ex plus 0.1ex minus .1ex
-	},
-	subsubsection={
-		format=\heiti\bfseries\raggedright\zihao{-4}\linespread{1.25},
-		beforeskip=0pt,
-		afterskip=0pt
-	},
-	appendix/name=附录
+    bibname = 参考文献,
+    contentsname=\heiti\zihao{3} 目\ 录,
+    section={
+        name={第,章},number=\chinese{section},
+        format=\heiti\bfseries\centering\zihao{3}\linespread{1.5},
+        % format=\heiti\bfseries\centering\zihao{3}\setlength{\baselineskip}{25pt},
+        beforeskip=20pt,%18ex plus 0.2ex minus .2ex,
+        afterskip=20pt%18ex plus 0.2ex minus .2ex
+    },
+    subsection={
+        format=\heiti\bfseries\raggedright\zihao{4}\linespread{1.5},
+        % format=\heiti\bfseries\raggedright\zihao{4}\setlength{\baselineskip}{25pt},
+        beforeskip=8.75pt,%18ex plus 0.1ex minus .1ex,
+        afterskip=8.75pt%18ex plus 0.1ex minus .1ex
+    },
+    subsubsection={
+        format=\heiti\bfseries\raggedright\zihao{-4}\linespread{1.5},
+        % format=\heiti\bfseries\raggedright\zihao{-4}\setlength{\baselineskip}{25pt},
+        beforeskip=0pt,
+        afterskip=0pt
+    },
+    appendix/name=附录
 }
 % \usepackage[UTF-8]{ctex}%設置中文
 
@@ -36,6 +40,7 @@
 \setCJKmainfont{STSong}%设置全局中文字体
 \usepackage{fontspec}%设置英文
 \setmainfont{Times New Roman} % 设置英文为Times New Roman
+\newCJKfontfamily\lishu{Baoli SC}
 \usepackage{amsmath,amssymb,amsthm}
 \let\hbaroriginal\hbar
 \AtBeginDocument{\let\hbar\hbaroriginal}
@@ -56,13 +61,17 @@
 \usepackage{longtable,booktabs}
 \usepackage{color}
 \usepackage[colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue]{hyperref}%#006eb2
+\usepackage{array}
+\usepackage{float}
+\usepackage{pifont}
+\usepackage{multirow}
 %\hypersetup{
-	%	colorlinks=true,
-	%	linkcolor=[rgb]{0,0.43,0.70},
-	%	citecolor=[rgb]{0,0.43,0.70},
-	%	filecolor=[rgb]{0,0.43,0.70},
-	%	urlcolor=[rgb]{0,0.43,0.70}
-	%}
+    %    colorlinks=true,
+    %    linkcolor=[rgb]{0,0.43,0.70},
+    %    citecolor=[rgb]{0,0.43,0.70},
+    %    filecolor=[rgb]{0,0.43,0.70},
+    %    urlcolor=[rgb]{0,0.43,0.70}
+    %}
 \usepackage{cleveref}   %可以调用 \Cref{fig:xxx}或者 \ref{fig:xxx}
 \usepackage{pdfpages}
 \usepackage{float}
@@ -70,7 +79,7 @@
 \usepackage{fancyhdr}%設置頁眉
 
 \usepackage{setspace}%设置行间距
-\setstretch{1.25}
+\setstretch{1.61}
 
 \usepackage[nottoc]{tocbibind}%[nottoc,numbib]
 %\usepackage{gbt7714}
@@ -95,28 +104,42 @@
 
 %设置图表编号格式为{章节号}-{章节内序号}
 \usepackage{chngcntr}
+% \counterwithin{figure}{section}
+% \counterwithin{table}{section}
+\usepackage{amsmath}
+\numberwithin{equation}{section}
+\renewcommand{\theequation}{\thesection-\arabic{equation}}
+% \renewcommand{\thefigure}{\thesection-\arabic{figure}}
+% \renewcommand{\thetable}{\thesection-\arabic{table}}
+
+% 将图表和表格的编号嵌套在章节编号中
 \counterwithin{figure}{section}
 \counterwithin{table}{section}
-\usepackage{amsmath}
+
+% 重新定义公式编号格式
 \numberwithin{equation}{section}
 \renewcommand{\theequation}{\thesection-\arabic{equation}}
 \renewcommand{\thefigure}{\thesection-\arabic{figure}}
 \renewcommand{\thetable}{\thesection-\arabic{table}}
 
+% 移除图表和表格标题中的冒号
+\captionsetup[table]{labelsep=space}
+\captionsetup[figure]{labelsep=space}
+
 \usepackage{pdfpages}
 
 % 定义中文摘要环境
 \newenvironment{cnabstract}{
-	\par\small
-	\noindent\mbox{}\hfill{\bfseries \cnabstractname}\hfill\mbox{}
-	\par\vskip 2.5ex
+    \par\small
+    \noindent\mbox{}\hfill{\bfseries \cnabstractname}\hfill\mbox{}
+    \par\vskip 2.5ex
 }{\par\vskip 2.5ex}
 
 % 定义英文摘要环境
 \newenvironment{enabstract}{
-	\par\small
-	\noindent\mbox{}\hfill{\bfseries \enabstractname}\hfill\mbox{}
-	\par\vskip 2.5ex
+    \par\small
+    \noindent\mbox{}\hfill{\bfseries \enabstractname}\hfill\mbox{}
+    \par\vskip 2.5ex
 }{\par\vskip 2.5ex}
 
 \newcommand{\cnabstractname}{\heiti \fontsize{16pt}{20pt}\textbf{摘\ 要}} % 中文摘要标题

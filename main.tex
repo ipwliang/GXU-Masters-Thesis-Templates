@@ -1,0 +1,85 @@
+% !TeX spellcheck = ug_CN-China
+\documentclass[UTF8, 12pt, AutoFakeBold]{ctexart}
+% 广西大学物理学院2021级硕士王信哲制作
+% 广西大学计电学院2022级硕士IPWL修改
+\input{context/uppack}
+\input{context/ADS_Expand}
+
+% 拟定文章的标题
+\newcommand{\ArticleTitle}{我的文章标题}
+\newcommand{\ArticleTitleEn}{English Title}
+
+\begin{document}
+
+% 加载封面；封面需要自己修改word模板后导出为pdf文件
+\setcounter{page}{1} % 重置页码
+\pagenumbering{roman}
+% 「毕业论文封面」文件仅供参考，以最新封面为主
+% 送审封面和非送审封面略有不同，建议2份分别制作
+% \includepdf[pages={-}]{送审版毕业论文封面.pdf}
+
+
+% 设置摘要、目录部分页码
+\setcounter{page}{1} % 重置页码
+\pagenumbering{Roman}
+\pagestyle{fancy} % 清除原页眉页脚样式
+\fancyhf{}
+\fancyfoot[C]{\thepage} % 在页脚中间添加页码
+
+
+\vspace*{-12pt}
+\input{context/0摘要}
+
+%% ------------------------------ %%
+{\hypersetup{linkcolor=black}\tableofcontents}
+\newpage
+\setcounter{page}{1} % 重置页码
+\pagenumbering{arabic} % 开始阿拉伯数字编码
+% R：页面右边; L：页面左边; C：页面中间
+\pagestyle{fancy}%清除原页眉页脚样式
+\fancyhf{}
+\fancyhead[L]{\lishu \fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文}
+% \fancyhead[L]{\fontsize{12pt}{15pt}\selectfont 广西大学硕士学位论文} %\leftmark：表示“一级标题”
+% \fancyhead[C]{\rightmark} %\rightmark：表示“二级标题”
+\fancyhead[R]{\lishu \fontsize{12pt}{15pt}\selectfont \ArticleTitle}%\thepage:表示“页码”
+\fancyfoot[C]{\thepage} % 在页脚中间添加页码
+%% ------------------------------ %%
+
+
+\vspace*{-36pt}
+\input{context/1绪论}
+\newpage
+
+\vspace*{-36pt}
+\input{context/2相关工作}
+\newpage
+
+\vspace*{-36pt}
+\input{context/3方法A}
+\newpage
+
+\vspace*{-36pt}
+\input{context/4方法B}
+\newpage
+
+\vspace*{-36pt}
+\input{context/6结论}
+\newpage
+
+\pagebreak
+\vspace*{-36pt}
+{\zihao{-4}\bibliography{context/references}}
+\pagebreak
+
+% \input{context/7附录}
+% \pagebreak
+
+\vspace*{-36pt}
+\input{context/8研究成果清单}
+\pagebreak
+
+\vspace*{-36pt}
+\input{context/9致谢}
+\pagebreak
+
+\end{document}
